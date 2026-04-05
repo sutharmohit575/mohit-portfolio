@@ -1,0 +1,354 @@
+<!-- MOHIT.EXE CHATBOT WIDGET v2 — paste everything below just before </body> -->
+
+<style>
+#chat-launcher-wrap{position:fixed;bottom:52px;right:14px;z-index:850}
+#chat-launcher{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#00ff41,#00ffff);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:0 0 16px rgba(0,255,65,.5);transition:transform .2s;animation:chatPulse 3s ease-in-out infinite}
+@keyframes chatPulse{0%,100%{box-shadow:0 0 16px rgba(0,255,65,.5)}50%{box-shadow:0 0 28px rgba(0,255,65,.9),0 0 48px rgba(0,255,65,.3)}}
+#chat-launcher:hover{transform:scale(1.12)}
+#chat-launcher.chat-open{background:linear-gradient(135deg,#ff003c,#ff6600);animation:none}
+#chat-notif{position:absolute;top:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:#ff003c;border:2px solid #0a0a0a;display:none}
+#chat-window{position:fixed;bottom:110px;right:14px;z-index:850;width:340px;max-height:520px;background:rgba(5,10,5,.98);border:1px solid rgba(0,255,65,.3);box-shadow:0 0 30px rgba(0,255,65,.15),0 8px 40px rgba(0,0,0,.6);display:none;flex-direction:column;font-family:'Share Tech Mono',monospace;overflow:hidden}
+#chat-window.chat-visible{display:flex;animation:chatOpen .2s cubic-bezier(.34,1.56,.64,1)}
+@keyframes chatOpen{from{transform:scale(.7) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+#chat-header{background:rgba(0,255,65,.08);border-bottom:1px solid rgba(0,255,65,.3);padding:9px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.chat-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#00ff41,#00ffff);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;animation:spin 8s linear infinite;border:1px solid rgba(0,255,65,.4)}
+.chat-header-info{flex:1}
+.chat-name{font-family:'Orbitron',sans-serif;font-size:.72rem;font-weight:700;color:#00ffff}
+.chat-status{font-size:.6rem;color:#00ff41}
+.chat-status::before{content:'● '}
+#chat-close-btn{background:none;border:none;color:#ff003c;font-size:1rem;cursor:pointer;padding:2px 6px;line-height:1}
+#chat-dsa-info{padding:4px 14px;font-size:.6rem;color:rgba(0,255,65,.5);border-bottom:1px solid rgba(0,255,65,.15);background:rgba(0,255,65,.02);flex-shrink:0;letter-spacing:.06em}
+#chat-dsa-info span{color:#ffff00}
+#chat-messages{flex:1;overflow-y:auto;padding:12px 12px 6px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:#00ff41 transparent}
+#chat-messages::-webkit-scrollbar{width:3px}
+#chat-messages::-webkit-scrollbar-thumb{background:#00ff41}
+.chat-msg{display:flex;flex-direction:column;gap:3px;max-width:88%}
+.chat-msg.bot{align-self:flex-start}
+.chat-msg.user{align-self:flex-end;align-items:flex-end}
+.chat-bubble{padding:8px 12px;font-size:.78rem;line-height:1.6;white-space:pre-wrap;word-break:break-word;border-radius:2px}
+.chat-msg.bot .chat-bubble{background:rgba(0,255,65,.07);border:1px solid rgba(0,255,65,.3);color:#00ff41}
+.chat-msg.user .chat-bubble{background:rgba(0,255,255,.08);border:1px solid rgba(0,255,255,.25);color:#00ffff}
+.chat-meta{font-size:.58rem;color:rgba(0,255,65,.4);padding:0 4px}
+.chat-intent-tag{display:inline-block;font-size:.55rem;padding:1px 6px;border:1px solid rgba(0,255,65,.25);color:#ffff00;letter-spacing:.08em;margin-top:2px}
+#chat-typing{display:none;align-items:center;gap:5px;padding:0 12px 6px;font-size:.7rem;color:rgba(0,255,65,.5)}
+#chat-typing.show{display:flex}
+.tydot{width:5px;height:5px;border-radius:50%;background:#00ff41;opacity:.4;animation:tybounce 1.2s ease-in-out infinite}
+.tydot:nth-child(2){animation-delay:.2s}
+.tydot:nth-child(3){animation-delay:.4s}
+@keyframes tybounce{0%,60%,100%{opacity:.4;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+#chat-chips{display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 8px;flex-shrink:0}
+.chat-chip{padding:3px 9px;border:1px solid rgba(0,255,65,.3);background:transparent;color:rgba(0,255,65,.6);font-family:'Share Tech Mono',monospace;font-size:.68rem;cursor:pointer;transition:all .15s}
+.chat-chip:hover{border-color:#00ffff;color:#00ffff}
+#chat-input-row{border-top:1px solid rgba(0,255,65,.3);display:flex;align-items:center;gap:6px;padding:7px 10px;flex-shrink:0;background:rgba(0,255,65,.03)}
+#chat-input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:.78rem;caret-color:#00ff41}
+#chat-input::placeholder{color:rgba(0,255,65,.35)}
+#chat-send-btn{background:none;border:1px solid rgba(0,255,65,.3);color:#00ff41;font-size:.9rem;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+#chat-send-btn:hover{background:#00ff41;color:#000}
+@media(max-width:480px){#chat-window{width:calc(100vw - 20px);right:10px;bottom:90px;max-height:60vh}}
+</style>
+
+<div id="chat-launcher-wrap">
+  <button id="chat-launcher" onclick="CHATBOT.toggle()" title="Chat with Mohit.exe">&#129302;</button>
+  <div id="chat-notif"></div>
+</div>
+
+<div id="chat-window">
+  <div id="chat-header">
+    <div class="chat-avatar">&#11041;</div>
+    <div class="chat-header-info">
+      <div class="chat-name">MOHIT.EXE</div>
+      <div class="chat-status">online — ask me anything</div>
+    </div>
+    <button id="chat-close-btn" onclick="CHATBOT.toggle()" title="Close">&#10005;</button>
+  </div>
+  <div id="chat-dsa-info">
+    DSA Engine: <span>Trie</span> &middot; <span>LRU Cache</span> &middot; <span>Min-Heap</span> &middot; <span>BFS Graph</span>
+  </div>
+  <div id="chat-messages"></div>
+  <div id="chat-typing">
+    <div class="tydot"></div><div class="tydot"></div><div class="tydot"></div>
+    <span>thinking...</span>
+  </div>
+  <div id="chat-chips"></div>
+  <div id="chat-input-row">
+    <input id="chat-input" type="text" placeholder="Ask about skills, projects..."
+      maxlength="200" autocomplete="off" spellcheck="false"
+      onkeydown="if(event.key==='Enter'){CHATBOT.send();event.preventDefault();}">
+    <button id="chat-send-btn" onclick="CHATBOT.send()">&#9654;</button>
+  </div>
+</div>
+
+<script>
+var CHATBOT = (function () {
+  'use strict';
+
+  /* ---------- TRIE ---------- */
+  function TNode() { this.ch = {}; this.intent = null; this.end = false; }
+  function Trie() { this.root = new TNode(); }
+  Trie.prototype.insert = function (phrase, intent) {
+    var node = this.root, s = phrase.toLowerCase(), i;
+    for (i = 0; i < s.length; i++) {
+      if (!node.ch[s[i]]) node.ch[s[i]] = new TNode();
+      node = node.ch[s[i]];
+    }
+    node.end = true; node.intent = intent;
+  };
+  Trie.prototype.find = function (text) {
+    var tokens = (text.toLowerCase().match(/[a-z0-9]+/g) || []);
+    var n = tokens.length, w, s, phrase, node, ok, i;
+    for (w = n; w >= 1; w--) {
+      for (s = 0; s <= n - w; s++) {
+        phrase = tokens.slice(s, s + w).join(' ');
+        node = this.root; ok = true;
+        for (i = 0; i < phrase.length; i++) {
+          if (!node.ch[phrase[i]]) { ok = false; break; }
+          node = node.ch[phrase[i]];
+        }
+        if (ok && node.end) return node.intent;
+      }
+    }
+    return null;
+  };
+
+  /* ---------- LRU CACHE ---------- */
+  function LRU(cap) { this.cap = cap || 64; this.map = {}; this.order = []; }
+  LRU.prototype.get = function (k) {
+    if (!(k in this.map)) return null;
+    var idx = this.order.indexOf(k);
+    if (idx > -1) { this.order.splice(idx, 1); this.order.push(k); }
+    return this.map[k];
+  };
+  LRU.prototype.put = function (k, v) {
+    if (k in this.map) { this.order.splice(this.order.indexOf(k), 1); }
+    this.map[k] = v; this.order.push(k);
+    if (this.order.length > this.cap) { var old = this.order.shift(); delete this.map[old]; }
+  };
+
+  /* ---------- KNOWLEDGE BASE ---------- */
+  var KB = {
+    greeting:    { t: "Hey! I'm Mohit.exe — your interactive guide.\nAsk me about skills, projects, experience, or how to hire Mohit!", c: ['skills','projects','contact'] },
+    about:       { t: "Mohit is a full-stack developer with 4+ years of experience.\nHe builds AI-powered web apps, scalable backends, and occasionally things that shouldn't exist.\nCurrently open to freelance and full-time roles.", c: ['skills','projects','contact'] },
+    skills:      { t: "Mohit's stack:\n\nFrontend : React, Next.js, HTML5, CSS3, Three.js\nBackend  : Node.js, Python, FastAPI\nAI / ML  : LangChain, OpenAI, Pinecone, RAG\nDatabase : PostgreSQL, MongoDB, Redis\nDevOps   : Docker, AWS, CI/CD", c: ['projects','ai','python'] },
+    projects:    { t: "Notable projects:\n\n1. NeuralChat   — AI chat app (2k+ users)\n2. PixelMart    — E-commerce + AI recs\n3. CryptoVault  — Zero-knowledge passwords\n4. AutoScribe   — Document AI (500+ biz)\n\nAsk about any project!", c: ['neuralchat','pixelmart','cryptovault','autoscribe'] },
+    neuralchat:  { t: "NeuralChat\nStack   : React, WebSocket, OpenAI, Redis\nFeature : Multi-model, plugin system, memory\nUsers   : 2,000+\nDemo    : neuralchat.mohit.dev", c: ['pixelmart','contact','skills'] },
+    pixelmart:   { t: "PixelMart\nStack   : Next.js, Stripe, PostgreSQL, Vercel\nFeature : Real-time inventory, AI recommendations\nDemo    : pixelmart.mohit.dev", c: ['cryptovault','contact','skills'] },
+    cryptovault: { t: "CryptoVault\nStack   : Rust, AES-256, WebAssembly, SQLite\nFeature : Zero-knowledge encryption, 2FA\nRepo    : github.com/sutharmohit575", c: ['autoscribe','contact','skills'] },
+    autoscribe:  { t: "AutoScribe\nStack   : Python, LangChain, FastAPI, Pinecone\nFeature : Extract, summarize, Q&A on any doc\nUsers   : 500+ businesses\nDemo    : autoscribe.mohit.dev", c: ['neuralchat','ai','contact'] },
+    experience:  { t: "Experience:\n\n- 4+ years full-stack development\n- 24+ shipped production projects\n- AI tools used by 500+ companies\n- Open source contributor", c: ['skills','projects','contact'] },
+    contact:     { t: "Reach Mohit:\n\nEmail    : mohit@dev.io\nGitHub   : github.com/sutharmohit575\nLinkedIn : linkedin.com/in/suthar-mohit575\nResponse : under 24 hours\n\nOr use the CONTACT BOSS form on this page!", c: ['hire','projects'] },
+    hire:        { t: "Mohit is open to:\n\n- Freelance projects (any size)\n- Full-time positions\n- Open source collaborations\n- Consulting and technical audits\n\nEmail: mohit@dev.io", c: ['skills','projects','contact'] },
+    education:   { t: "Mostly self-taught.\nThe internet, open source, and a lot of side projects. He believes in learning by building.", c: ['skills','projects'] },
+    location:    { t: "Based in India (IST, UTC+5:30).\nAvailable for remote work worldwide.", c: ['contact','hire'] },
+    ai:          { t: "AI / ML expertise:\n\n- LangChain, LlamaIndex, RAG pipelines\n- OpenAI, Gemini, Claude API integrations\n- Vector DBs: Pinecone, Chroma, Weaviate\n- Fine-tuning, embeddings, prompt engineering", c: ['autoscribe','skills','contact'] },
+    python:      { t: "Python expertise:\n\n- FastAPI and Django for backend APIs\n- Data processing: Pandas, NumPy\n- AI/ML: PyTorch, Transformers\n- Scripting and automation\n\nYou are talking to a Python DSA chatbot right now!", c: ['skills','ai','projects'] },
+    javascript:  { t: "JavaScript / TypeScript:\n\n- React, Next.js, Vue\n- Node.js with Express / Fastify\n- WebSockets, WebRTC, Web APIs\n- Full-stack TypeScript end-to-end", c: ['react','skills','projects'] },
+    react:       { t: "React / Next.js:\n\n- Hooks, context, server components\n- SSR, SSG, and edge functions\n- Performance: code-splitting, memoization", c: ['javascript','projects','skills'] },
+    dsa:         { t: "This chatbot IS a DSA project!\n\nTrie      - O(m) intent prefix matching\nLRU Cache - O(1) memoization of queries\nMin-Heap  - ranked fuzzy keyword scoring\nBFS Graph - conversation flow navigation\nDeque     - bounded context window\n\nAll implemented in pure Python + JS port.", c: ['python','skills','about'] },
+    game:        { t: "Mohit is a gamer!\nFavorite: Hollow Knight (112% completion).\nThis portfolio is game-themed — try Snake.EXE or the Konami code!", c: ['about','projects'] },
+    availability:{ t: "Mohit is currently OPEN TO WORK.\n\n- Full-time (remote or hybrid)\n- Freelance and contracts\n- Part-time consulting\n\nResponse time: under 24 hours.", c: ['contact','hire','skills'] },
+    help:        { t: "Things you can ask:\n\n- What are his skills?\n- Show me projects\n- Tell me about NeuralChat\n- How to contact Mohit?\n- Can I hire him?\n- Is he available?\n- What is Python?\n- How is this chatbot built?", c: ['skills','projects','contact'] },
+    unknown:     { t: "I didn't quite catch that.\nTry asking about:\n\n- skills or projects\n- A project: NeuralChat, PixelMart...\n- How to contact or hire Mohit\n- Or just type: help", c: ['help','skills','contact'] }
+  };
+
+  /* ---------- KEYWORD MAP + IDF ---------- */
+  var KM = {
+    greeting:    ['hello','hi','hey','morning','evening','greet','yo','sup'],
+    about:       ['mohit','about','who','developer','person','introduce','profile','himself'],
+    skills:      ['skill','skills','tech','stack','technology','language','framework','expertise','know','what'],
+    projects:    ['project','projects','built','made','created','work','show','app','website'],
+    neuralchat:  ['neural','neuralchat','chat','conversation','realtime','websocket'],
+    pixelmart:   ['pixel','pixelmart','mart','shop','ecommerce','store','stripe','payment'],
+    cryptovault: ['crypto','cryptovault','vault','password','secure','encrypt','aes'],
+    autoscribe:  ['auto','autoscribe','scribe','document','pdf','summarize','extract'],
+    experience:  ['experience','years','history','career','professional','worked'],
+    contact:     ['contact','email','reach','linkedin','github','connect'],
+    hire:        ['hire','hiring','freelance','job','salary','rate','contract','position'],
+    education:   ['education','study','degree','learn','university','college'],
+    location:    ['location','where','india','remote','timezone','based'],
+    ai:          ['ai','ml','artificial','intelligence','machine','learning','langchain','openai','gpt'],
+    python:      ['python','django','fastapi','flask','pandas','numpy'],
+    javascript:  ['javascript','typescript','js','ts','node','express','frontend'],
+    react:       ['react','reactjs','next','nextjs','component','hook','jsx'],
+    dsa:         ['data','structure','algorithm','trie','heap','graph','bfs','cache','lru','chatbot'],
+    game:        ['game','gaming','snake','hollow','knight','konami','gamer'],
+    availability:['available','open','status','currently','looking'],
+    help:        ['help','guide','options','ask','question','commands']
+  };
+  var kwFreq = {}, totalI = Object.keys(KM).length, kw, kws, i, intent;
+  for (intent in KM) { kws = KM[intent]; for (i = 0; i < kws.length; i++) { kw = kws[i]; kwFreq[kw] = (kwFreq[kw] || 0) + 1; } }
+  var IDF = {};
+  for (kw in kwFreq) IDF[kw] = Math.log(totalI / kwFreq[kw] + 1);
+  var SPEC = { neuralchat:10,pixelmart:10,cryptovault:10,autoscribe:10, python:8,javascript:8,react:8,ai:8,dsa:8, hire:7,availability:7,contact:7,location:7,education:7, skills:6,projects:6,experience:6,game:6, about:4,help:3,greeting:2 };
+
+  function fuzzy(text) {
+    var tokens = {}, words = (text.toLowerCase().match(/\w+/g) || []);
+    for (i = 0; i < words.length; i++) tokens[words[i]] = true;
+    var scores = [], s;
+    for (intent in KM) {
+      s = 0; kws = KM[intent];
+      for (i = 0; i < kws.length; i++) { if (tokens[kws[i]]) s += (IDF[kws[i]] || 1); }
+      if (s > 0) scores.push([s, intent]);
+    }
+    scores.sort(function (a, b) { return b[0] - a[0]; });
+    return scores;
+  }
+
+  /* ---------- TRIE PHRASES ---------- */
+  var trie = new Trie();
+  var phrases = [
+    ['hello','greeting'],['hi','greeting'],['hey','greeting'],['good morning','greeting'],
+    ['about','about'],['who is mohit','about'],['tell me about mohit','about'],
+    ['skill','skills'],['skills','skills'],['tech stack','skills'],
+    ['project','projects'],['projects','projects'],['show me projects','projects'],
+    ['neuralchat','neuralchat'],['neural','neuralchat'],
+    ['pixelmart','pixelmart'],['pixel','pixelmart'],
+    ['cryptovault','cryptovault'],['vault','cryptovault'],
+    ['autoscribe','autoscribe'],
+    ['contact','contact'],['email','contact'],['github','contact'],['linkedin','contact'],
+    ['hire','hire'],['freelance','hire'],['job','hire'],
+    ['available','availability'],['open to work','availability'],
+    ['python','python'],['javascript','javascript'],['react','react'],
+    ['dsa','dsa'],['data structure','dsa'],['trie','dsa'],
+    ['game','game'],['hollow knight','game'],
+    ['help','help'],
+    ['experience','experience'],['education','education'],
+    ['location','location'],['india','location'],
+    ['ai','ai'],['machine learning','ai'],['artificial intelligence','ai']
+  ];
+  for (i = 0; i < phrases.length; i++) trie.insert(phrases[i][0], phrases[i][1]);
+
+  /* ---------- RESOLVE ---------- */
+  function resolve(text) {
+    var scores = fuzzy(text), boosted, topRaw, hit;
+    if (scores.length > 0) {
+      boosted = [];
+      for (i = 0; i < scores.length; i++) {
+        boosted.push([scores[i][0] + (SPEC[scores[i][1]] || 0) * 0.01, scores[i][0], scores[i][1]]);
+      }
+      boosted.sort(function (a, b) { return b[0] - a[0]; });
+      topRaw = boosted[0][1];
+      if (topRaw >= 0.5) return boosted[0][2];
+    }
+    hit = trie.find(text);
+    if (hit) return hit;
+    return 'unknown';
+  }
+
+  /* ---------- ENGINE STATE ---------- */
+  var cache = new LRU(64), context = [], qCount = 0, cacheHits = 0;
+
+  function getReply(msg) {
+    qCount++;
+    var norm = msg.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!norm) return null;
+
+    var hit = cache.get(norm);
+    if (hit) { cacheHits++; return { intent: hit.intent, text: hit.text, chips: hit.chips, fromCache: true, q: qCount }; }
+
+    var resolvedIntent = resolve(norm);
+    var entry = KB[resolvedIntent];
+    if (!entry) { resolvedIntent = 'unknown'; entry = KB['unknown']; }
+
+    /* CRITICAL: always use entry.t — never leave text undefined */
+    var text  = entry.t  || 'Sorry, no response found. Try: help';
+    var chips = entry.c  || ['help','skills','contact'];
+
+    context.push(resolvedIntent);
+    if (context.length > 8) context.shift();
+
+    cache.put(norm, { intent: resolvedIntent, text: text, chips: chips });
+    return { intent: resolvedIntent, text: text, chips: chips, fromCache: false, q: qCount };
+  }
+
+  /* ---------- UI HELPERS ---------- */
+  var isOpen = false, opened = false;
+  function ts() { return new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false}); }
+  function safe(s) { if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function scrollDown() { var el = document.getElementById('chat-messages'); if (el) setTimeout(function(){el.scrollTop=el.scrollHeight;},30); }
+
+  function addUserMsg(text) {
+    var msgs = document.getElementById('chat-messages'); if (!msgs) return;
+    var d = document.createElement('div'); d.className = 'chat-msg user';
+    d.innerHTML = '<div class="chat-bubble">' + safe(text) + '</div><div class="chat-meta">' + ts() + '</div>';
+    msgs.appendChild(d); scrollDown();
+  }
+
+  function addBotMsg(r) {
+    if (!r || !r.text) return;
+    var msgs = document.getElementById('chat-messages'); if (!msgs) return;
+    var d = document.createElement('div'); d.className = 'chat-msg bot';
+    /* Use safe() then replace \n with <br> for line breaks */
+    var html = safe(r.text).replace(/\n/g,'<br>');
+    d.innerHTML = '<div class="chat-bubble">' + html + '</div>' +
+      '<div class="chat-intent-tag">' + safe(r.intent) + '</div>' +
+      '<div class="chat-meta">' + ts() + ' cache:' + (r.fromCache?'Y':'N') + ' #'+r.q+'</div>';
+    msgs.appendChild(d); scrollDown();
+
+    var bar = document.getElementById('chat-chips'); if (!bar) return;
+    bar.innerHTML = '';
+    if (r.chips && r.chips.length) {
+      r.chips.forEach(function(label){
+        var btn = document.createElement('button');
+        btn.className = 'chat-chip';
+        btn.textContent = label;
+        btn.onclick = function(){ CHATBOT.sendText(label); };
+        bar.appendChild(btn);
+      });
+    }
+  }
+
+  function showTyping() { var e = document.getElementById('chat-typing'); if(e) e.classList.add('show'); scrollDown(); }
+  function hideTyping() { var e = document.getElementById('chat-typing'); if(e) e.classList.remove('show'); }
+  function clearChips() { var e = document.getElementById('chat-chips'); if(e) e.innerHTML=''; }
+
+  /* ---------- PUBLIC ---------- */
+  return {
+    toggle: function () {
+      isOpen = !isOpen;
+      var win = document.getElementById('chat-window');
+      var btn = document.getElementById('chat-launcher');
+      var notif = document.getElementById('chat-notif');
+      if (!win || !btn) return;
+      if (isOpen) {
+        win.classList.add('chat-visible'); btn.classList.add('chat-open'); btn.innerHTML = '&#10005;';
+        if (notif) notif.style.display = 'none';
+        if (!opened) {
+          opened = true;
+          setTimeout(function(){ addBotMsg(getReply('hello')); }, 350);
+        }
+        setTimeout(function(){ var inp=document.getElementById('chat-input'); if(inp) inp.focus(); }, 400);
+      } else {
+        win.classList.remove('chat-visible'); btn.classList.remove('chat-open'); btn.innerHTML = '&#129302;';
+      }
+      if (typeof SFX !== 'undefined' && SFX.navClick) SFX.navClick();
+    },
+
+    send: function () {
+      var inp = document.getElementById('chat-input'); if (!inp) return;
+      var msg = inp.value.trim(); if (!msg) return;
+      inp.value = '';
+      addUserMsg(msg); clearChips(); showTyping();
+      if (typeof SFX !== 'undefined' && SFX.termEnter) SFX.termEnter();
+      var delay = Math.min(400 + msg.length * 10, 900);
+      setTimeout(function(){
+        hideTyping();
+        var r = getReply(msg);
+        if (r) { addBotMsg(r); if (typeof SFX !== 'undefined' && SFX.termSuccess) SFX.termSuccess(); }
+      }, delay);
+    },
+
+    sendText: function (text) {
+      var inp = document.getElementById('chat-input'); if (inp) inp.value = text;
+      this.send();
+    }
+  };
+})();
+
+/* Notification dot after 8s */
+setTimeout(function(){
+  if (!document.querySelector('#chat-launcher.chat-open')) {
+    var n = document.getElementById('chat-notif'); if(n) n.style.display='block';
+  }
+}, 8000);
+</script>
+<!-- END MOHIT.EXE CHATBOT WIDGET -->

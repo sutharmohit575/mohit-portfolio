@@ -1,0 +1,8 @@
+# Chatbot server dependencies
+# These are the same as the root requirements.txt
+# Install from the chatbot/ folder:
+#   pip install -r requirements.txt
+
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+pydantic==2.10.3
