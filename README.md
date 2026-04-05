@@ -1,4 +1,4 @@
-# 🖥 MOHIT.EXE — Portfolio OS v3.0
+# 🖥 MOHIT.EXE — Portfolio OS v2.0
 
 > The most unhinged developer portfolio you'll ever visit.
 > Terminal · RPG Skill Tree · Boss Fight · Snake.EXE · AI Chatbot · Easter Eggs
