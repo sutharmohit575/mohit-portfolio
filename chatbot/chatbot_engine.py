@@ -249,11 +249,11 @@ RESPONSES: dict[str, dict] = {
         "suggestions": ["skills", "projects", "contact"],
     },
     "contact": {
-        "text": "📬 Reach Mohit:\n• Email:    mohit@dev.io\n• GitHub:   github.com/sutharmohit575\n• LinkedIn: linkedin.com/in/suthar-mohit575\n• Response: < 24 hours\n\nOr use the ⚔ CONTACT BOSS form on this page!",
+        "text": "📬 Reach Mohit:\n• Email:    sutharmohit575@gmail.com\n• GitHub:   github.com/sutharmohit575\n• LinkedIn: linkedin.com/in/suthar-mohit575\n• Response: < 24 hours\n\nOr use the ⚔ CONTACT BOSS form on this page!",
         "suggestions": ["projects", "about"],
     },
     "hire": {
-        "text": "🚀 Mohit is open to:\n• Freelance projects (any size)\n• Full-time positions\n• Open source collaborations\n• Consulting & technical audits\n\nRates: Let's talk — he's not cheap, but he's worth it 😄\nEmail: mohit@dev.io",
+        "text": "🚀 Mohit is open to:\n• Freelance projects (any size)\n• Full-time positions\n• Open source collaborations\n• Consulting & technical audits\n\nRates: Let's talk — he's not cheap, but he's worth it 😄\nEmail: sutharmohit575@gmail.com",
         "suggestions": ["skills", "projects", "contact"],
     },
     "education": {
