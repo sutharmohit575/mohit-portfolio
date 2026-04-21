@@ -1,0 +1,3688 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MOHIT.EXE — Portfolio OS v2.0</title>
+  <meta name="description"
+    content="Mohit's interactive developer portfolio — a full OS experience with terminal, RPG skill tree, boss fight contact form, and Snake.EXE.">
+  <meta property="og:title" content="MOHIT.EXE — Portfolio OS v2.0">
+  <meta property="og:description"
+    content="The most unhinged developer portfolio you'll ever visit. Terminal. Snake. Boss fight. Easter eggs.">
+  <meta property="og:type" content="website">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%2300ff41' style='filter: drop-shadow(0px 0px 8px %2300ff41);'>⬡</text></svg>">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ══════════════════════════════════════════
+       CSS VARIABLES & THEMES
+    ══════════════════════════════════════════ */
+    :root {
+      --green: #00ff41;
+      --cyan: #00ffff;
+      --red: #ff003c;
+      --yellow: #ffff00;
+      --orange: #ff6600;
+      --purple: #bf5fff;
+      --bg: #0a0a0a;
+      --bg2: #0d1117;
+      --panel: rgba(0, 255, 65, 0.05);
+      --border: rgba(0, 255, 65, 0.3);
+      --glow: 0 0 10px rgba(0, 255, 65, 0.5), 0 0 30px rgba(0, 255, 65, 0.2);
+      --red-glow: 0 0 10px rgba(255, 0, 60, 0.8), 0 0 30px rgba(255, 0, 60, 0.4);
+      --text-dim: rgba(0, 255, 65, 0.6);
+    }
+
+    body.theme-amber {
+      --green: #ffb000;
+      --cyan: #ffcc44;
+      --border: rgba(255, 176, 0, 0.3);
+      --panel: rgba(255, 176, 0, 0.05);
+      --glow: 0 0 10px rgba(255, 176, 0, 0.5), 0 0 30px rgba(255, 176, 0, 0.2);
+      --text-dim: rgba(255, 176, 0, 0.6);
+    }
+
+    body.theme-win95 {
+      --green: #000080;
+      --cyan: #0000aa;
+      --bg: #c0c0c0;
+      --bg2: #c0c0c0;
+      --panel: rgba(0, 0, 128, 0.08);
+      --border: rgba(0, 0, 128, 0.5);
+      --text-dim: #333;
+      color: #000080 !important;
+    }
+
+    body.theme-hc {
+      --green: #ffffff;
+      --cyan: #ffff00;
+      --bg: #000000;
+      --bg2: #000000;
+      --panel: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.6);
+      --text-dim: rgba(255, 255, 255, 0.8);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+      height: 100vh;
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='3' fill='%2300ff41'/%3E%3Ccircle cx='10' cy='10' r='7' fill='none' stroke='%2300ff41' stroke-width='1'/%3E%3C/svg%3E") 10 10, crosshair;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    body.theme-win95 {
+      cursor: default !important;
+    }
+
+    body::selection {
+      background: var(--border);
+    }
+
+    /* SCANLINES */
+    #scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9998;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.07) 2px, rgba(0, 0, 0, 0.07) 4px);
+    }
+
+    body.scanlines-off #scanlines {
+      display: none;
+    }
+
+    /* CRT FLICKER */
+    @keyframes flicker {
+
+      0%,
+      95%,
+      100% {
+        opacity: 1
+      }
+
+      96% {
+        opacity: 0.95
+      }
+
+      97% {
+        opacity: 1
+      }
+
+      98% {
+        opacity: 0.9
+      }
+    }
+
+    body {
+      animation: flicker 8s infinite;
+    }
+
+    body.crt-off {
+      animation: none;
+    }
+
+    /* XP BAR (global) */
+    #xp-bar-wrap {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: rgba(0, 255, 65, 0.1);
+      z-index: 800;
+    }
+
+    #xp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      box-shadow: var(--glow);
+      width: 0%;
+      transition: width 0.6s ease;
+    }
+
+    #xp-label {
+      position: fixed;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      z-index: 801;
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: 0.1em;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    #xp-label.show {
+      opacity: 1;
+    }
+
+    /* ══════════════════════════════════════════
+       BOOT SCREEN
+    ══════════════════════════════════════════ */
+    #boot-screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'VT323', monospace;
+      font-size: 1.3rem;
+    }
+
+    .boot-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--green);
+      text-shadow: var(--glow);
+      margin-bottom: 2rem;
+      letter-spacing: 0.3em;
+    }
+
+    .boot-line {
+      color: var(--green);
+      opacity: 0;
+      animation: bootAppear 0.1s forwards;
+      width: 520px;
+      max-width: 92vw;
+    }
+
+    .boot-line.ok::after {
+      content: ' [OK]';
+      color: var(--cyan);
+    }
+
+    .boot-line.fail::after {
+      content: ' [FAIL]';
+      color: var(--red);
+    }
+
+    .boot-line.warn::after {
+      content: ' [WARN]';
+      color: var(--yellow);
+    }
+
+    @keyframes bootAppear {
+      to {
+        opacity: 1;
+      }
+    }
+
+    #boot-progress {
+      width: 520px;
+      max-width: 92vw;
+      height: 4px;
+      background: #111;
+      border: 1px solid var(--green);
+      margin-top: 1.5rem;
+      overflow: hidden;
+    }
+
+    #boot-bar {
+      height: 100%;
+      background: var(--green);
+      box-shadow: var(--glow);
+      width: 0%;
+      transition: width 0.25s;
+    }
+
+    /* ══════════════════════════════════════════
+       MAIN OS
+    ══════════════════════════════════════════ */
+    #os {
+      display: none;
+      height: 100vh;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* TASKBAR */
+    #taskbar {
+      background: rgba(0, 255, 65, 0.08);
+      border-bottom: 1px solid var(--border);
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+      gap: 8px;
+    }
+
+    .taskbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .os-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--cyan);
+      text-shadow: 0 0 10px var(--cyan);
+      white-space: nowrap;
+    }
+
+    .taskbar-btn {
+      padding: 2px 9px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.74rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .taskbar-btn:hover,
+    .taskbar-btn.active {
+      background: var(--green);
+      color: #000;
+      box-shadow: var(--glow);
+    }
+
+    .taskbar-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    #clock {
+      color: var(--cyan);
+      font-variant-numeric: tabular-nums;
+    }
+
+    #theme-btn {
+      padding: 2px 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    #theme-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* DESKTOP */
+    #desktop {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      grid-template-rows: 1fr 160px;
+      gap: 6px;
+      padding: 6px;
+      overflow: hidden;
+    }
+
+    /* PANELS */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: inset 0 0 20px rgba(0, 255, 65, 0.02);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      opacity: 0.4;
+    }
+
+    .panel-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.62rem;
+      color: var(--cyan);
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: 0.15em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .panel-title::before {
+      content: '▶';
+      font-size: 0.45rem;
+    }
+
+    /* ══════════════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════════════ */
+    #sidebar {
+      grid-row: 1 / 3;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #avatar-section {
+      padding: 16px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .avatar-frame {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 10px;
+      position: relative;
+    }
+
+    .avatar-svg {
+      width: 80px;
+      height: 80px;
+    }
+
+    .avatar-ring {
+      position: absolute;
+      inset: -5px;
+      border: 2px solid var(--green);
+      border-radius: 50%;
+      animation: spin 8s linear infinite;
+      border-top-color: transparent;
+      border-right-color: transparent;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .dev-name {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+
+    .dev-title {
+      font-size: 0.7rem;
+      color: var(--cyan);
+      margin-bottom: 8px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border: 1px solid var(--green);
+      font-size: 0.65rem;
+      color: var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      50% {
+        box-shadow: var(--glow);
+        border-color: var(--cyan);
+        color: var(--cyan);
+      }
+    }
+
+    /* XP TRACKER */
+    #xp-tracker {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .xp-tracker-label {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .xp-tracker-bar {
+      height: 6px;
+      background: rgba(0, 255, 65, 0.1);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      border-radius: 1px;
+    }
+
+    .xp-tracker-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      width: 0%;
+      transition: width 0.8s ease;
+      box-shadow: 0 0 6px rgba(0, 255, 65, 0.4);
+    }
+
+    #nav-menu {
+      padding: 6px 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      padding: 8px 16px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-left: 2px solid transparent;
+      color: var(--text-dim);
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(0, 255, 65, 0.08);
+      border-left-color: var(--green);
+      color: var(--green);
+      text-shadow: 0 0 8px var(--green);
+      padding-left: 20px;
+    }
+
+    .nav-icon {
+      font-size: 0.85rem;
+      width: 18px;
+    }
+
+    #achievement-sidebar {
+      padding: 10px 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .achieve-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.58rem;
+      color: var(--yellow);
+      margin-bottom: 8px;
+      letter-spacing: 0.1em;
+    }
+
+    .badge-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .badge {
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      opacity: 0.18;
+      transition: all 0.3s;
+      cursor: help;
+      position: relative;
+    }
+
+    .badge.unlocked {
+      opacity: 1;
+      border-color: var(--yellow);
+      box-shadow: 0 0 8px rgba(255, 255, 0, 0.4);
+      animation: badgePop 0.5s ease;
+    }
+
+    @keyframes badgePop {
+      0% {
+        transform: scale(0.5)
+      }
+
+      70% {
+        transform: scale(1.2)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       MAIN CONTENT
+    ══════════════════════════════════════════ */
+    #main-content {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .content-section {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+    }
+
+    .content-section.active {
+      display: flex;
+    }
+
+    /* TERMINAL */
+    #terminal-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #terminal-path {
+      padding: 4px 16px;
+      font-size: 0.7rem;
+      color: var(--yellow);
+      border-bottom: 1px solid var(--border);
+      background: rgba(0, 255, 65, 0.03);
+      font-family: 'Share Tech Mono', monospace;
+    }
+
+    #terminal-output {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      scrollbar-width: thin;
+      scrollbar-color: var(--green) transparent;
+    }
+
+    #terminal-output::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    #terminal-output::-webkit-scrollbar-thumb {
+      background: var(--green);
+    }
+
+    .t-line {
+      margin-bottom: 1px;
+      word-break: break-all;
+    }
+
+    .t-prompt {
+      color: var(--cyan);
+    }
+
+    .t-cmd {
+      color: #fff;
+    }
+
+    .t-out {
+      color: var(--green);
+    }
+
+    .t-err {
+      color: var(--red);
+    }
+
+    .t-info {
+      color: var(--yellow);
+    }
+
+    .t-success {
+      color: var(--cyan);
+    }
+
+    .t-dim {
+      color: var(--text-dim);
+    }
+
+    .t-link {
+      color: var(--purple);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    #terminal-input-row {
+      padding: 7px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .prompt-label {
+      color: var(--cyan);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    #terminal-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.82rem;
+      caret-color: var(--green);
+    }
+
+    /* Tab completions */
+    #tab-hint {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      padding: 0 14px 4px;
+      font-style: italic;
+      min-height: 16px;
+    }
+
+    /* ABOUT */
+    #about-content {
+      padding: 16px;
+      overflow-y: auto;
+      gap: 14px;
+    }
+
+    .section-header {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--cyan);
+      text-shadow: 0 0 15px var(--cyan);
+      margin-bottom: 14px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-card {
+      border: 1px solid var(--border);
+      padding: 9px 12px;
+      background: var(--panel);
+      transition: all 0.2s;
+      cursor: default;
+    }
+
+    .stat-card:hover {
+      border-color: var(--cyan);
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .bio-text {
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: rgba(0, 255, 65, 0.8);
+      margin-bottom: 14px;
+    }
+
+    .link-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .ext-link {
+      padding: 4px 14px;
+      border: 1px solid var(--border);
+      font-size: 0.74rem;
+      color: var(--cyan);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .ext-link:hover {
+      background: var(--cyan);
+      color: #000;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+    }
+
+    /* SKILL TREE */
+    #skills-content {
+      padding: 14px;
+      overflow-y: auto;
+      gap: 10px;
+    }
+
+    .skill-tree {
+      margin-bottom: 14px;
+    }
+
+    .tree-branch {
+      font-size: 0.79rem;
+      padding: 3px 0;
+    }
+
+    .tree-node {
+      display: inline-block;
+      padding: 2px 9px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin: 2px;
+    }
+
+    .tree-node:hover,
+    .tree-node.active-node {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+    }
+
+    .tree-connector {
+      color: rgba(0, 255, 65, 0.35);
+    }
+
+    .xp-bar {
+      height: 4px;
+      background: #111;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: inline-block;
+      width: 90px;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    .xp-fill {
+      height: 100%;
+      background: var(--green);
+      transition: width 1.2s ease;
+    }
+
+    /* PROJECTS */
+    #projects-content {
+      padding: 14px;
+      overflow-y: auto;
+      gap: 8px;
+    }
+
+    .project-card {
+      border: 1px solid var(--border);
+      padding: 12px;
+      background: var(--panel);
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 50%, rgba(0, 255, 65, 0.04));
+    }
+
+    .project-card:hover {
+      border-color: var(--cyan);
+      transform: translateX(4px);
+      box-shadow: -4px 0 0 var(--cyan);
+    }
+
+    .project-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 5px;
+    }
+
+    .project-desc {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .tag {
+      padding: 1px 7px;
+      border: 1px solid var(--border);
+      font-size: 0.65rem;
+      color: var(--yellow);
+    }
+
+    .biome-label {
+      position: absolute;
+      top: 9px;
+      right: 12px;
+      font-size: 0.6rem;
+      color: rgba(0, 255, 65, 0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .project-links {
+      display: flex;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .proj-btn {
+      padding: 3px 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .proj-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* BOSS FIGHT */
+    #boss-content {
+      padding: 16px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      overflow-y: auto;
+    }
+
+    #boss-content.active {
+      display: flex;
+    }
+
+    .boss-arena {
+      width: 100%;
+      max-width: 520px;
+      text-align: center;
+    }
+
+    .boss-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--red);
+      text-shadow: var(--red-glow);
+      margin-bottom: 3px;
+    }
+
+    .boss-subtitle {
+      font-size: 0.75rem;
+      color: rgba(255, 0, 60, 0.55);
+      margin-bottom: 16px;
+    }
+
+    .boss-sprite {
+      font-size: 4.5rem;
+      display: block;
+      margin: 0 auto 10px;
+      animation: bossBob 2s ease-in-out infinite;
+    }
+
+    @keyframes bossBob {
+
+      0%,
+      100% {
+        transform: translateY(0) scaleX(1)
+      }
+
+      50% {
+        transform: translateY(-8px) scaleX(-1)
+      }
+    }
+
+    .boss-hp-label {
+      font-size: 0.72rem;
+      color: var(--red);
+      margin-bottom: 3px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .boss-hp-bar {
+      height: 14px;
+      background: #1a0000;
+      border: 1px solid var(--red);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .boss-hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff003c, #ff6600);
+      transition: width 0.7s ease;
+      box-shadow: 0 0 8px rgba(255, 0, 60, 0.5);
+    }
+
+    .question-card {
+      background: rgba(255, 0, 60, 0.05);
+      border: 1px solid rgba(255, 0, 60, 0.25);
+      padding: 13px;
+      margin-bottom: 10px;
+      text-align: left;
+      width: 100%;
+    }
+
+    .q-label {
+      font-size: 0.65rem;
+      color: var(--red);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .q-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 7px;
+    }
+
+    .q-btn {
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 0, 60, 0.25);
+      background: transparent;
+      color: rgba(255, 255, 255, 0.65);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.74rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .q-btn:hover {
+      border-color: var(--red);
+      color: #fff;
+      background: rgba(255, 0, 60, 0.08);
+    }
+
+    .q-btn.selected {
+      border-color: var(--yellow);
+      color: var(--yellow);
+      background: rgba(255, 255, 0, 0.04);
+    }
+
+    #boss-submit {
+      width: 100%;
+      padding: 11px;
+      background: linear-gradient(135deg, #ff003c, #ff6600);
+      border: none;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: var(--red-glow);
+    }
+
+    #boss-submit:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 24px rgba(255, 0, 60, 1);
+    }
+
+    #boss-victory {
+      display: none;
+      text-align: center;
+    }
+
+    .victory-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      color: var(--yellow);
+      text-shadow: 0 0 15px var(--yellow);
+      animation: victoryPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes victoryPulse {
+      50% {
+        transform: scale(1.05)
+      }
+    }
+
+    .loot-box {
+      margin-top: 16px;
+      border: 1px solid var(--yellow);
+      padding: 14px;
+      text-align: left;
+      background: rgba(255, 255, 0, 0.03);
+    }
+
+    .loot-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      color: var(--yellow);
+      margin-bottom: 10px;
+      letter-spacing: 0.15em;
+    }
+
+    .loot-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .loot-link {
+      padding: 6px 14px;
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .loot-link:hover {
+      background: var(--cyan);
+      color: #000;
+    }
+
+    /* LOG PANEL */
+    #log-panel {
+      overflow: hidden;
+    }
+
+    #log-body {
+      padding: 6px 14px;
+      font-size: 0.7rem;
+      height: calc(100% - 32px);
+      overflow-y: auto;
+      line-height: 1.7;
+    }
+
+    .log-entry {
+      display: flex;
+      gap: 10px;
+      color: var(--text-dim);
+    }
+
+    .log-time {
+      color: rgba(0, 255, 65, 0.25);
+      white-space: nowrap;
+    }
+
+    .log-warn {
+      color: var(--yellow);
+    }
+
+    .log-crit {
+      color: var(--red);
+    }
+
+    /* ══════════════════════════════════════════
+       ACHIEVEMENT POPUP
+    ══════════════════════════════════════════ */
+    #achieve-popup {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.96);
+      border: 1px solid var(--yellow);
+      box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
+      padding: 12px 16px;
+      z-index: 500;
+      display: none;
+      max-width: 260px;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(110%);
+        opacity: 0
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1
+      }
+    }
+
+    .ap-label {
+      font-size: 0.62rem;
+      color: var(--yellow);
+      letter-spacing: 0.15em;
+      margin-bottom: 3px;
+    }
+
+    .ap-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.82rem;
+      color: #fff;
+    }
+
+    .ap-icon {
+      font-size: 1.4rem;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    /* ══════════════════════════════════════════
+       OVERLAYS
+    ══════════════════════════════════════════ */
+    /* MATRIX */
+    #matrix-rain {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      background: #000;
+    }
+
+    #matrix-rain canvas {
+      display: block;
+    }
+
+    #matrix-close {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 901;
+      background: var(--red);
+      border: none;
+      color: #fff;
+      padding: 6px 14px;
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    /* KONAMI */
+    #konami-msg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.96);
+      z-index: 950;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .konami-title {
+      font-family: 'VT323', monospace;
+      font-size: 3.5rem;
+      color: var(--yellow);
+      margin-bottom: 16px;
+      text-shadow: 0 0 30px var(--yellow);
+    }
+
+    .konami-close {
+      margin-top: 16px;
+      padding: 8px 28px;
+      border: 2px solid var(--yellow);
+      background: transparent;
+      color: var(--yellow);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    /* SNAKE */
+    #snake-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.97);
+      z-index: 950;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #snake-overlay.open {
+      display: flex;
+    }
+
+    #snake-wrapper {
+      border: 1px solid var(--green);
+      box-shadow: var(--glow), 0 0 60px rgba(0, 255, 65, 0.08);
+      background: #000;
+      position: relative;
+    }
+
+    #snake-titlebar {
+      background: rgba(0, 255, 65, 0.08);
+      border-bottom: 1px solid var(--border);
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.62rem;
+      color: var(--cyan);
+      letter-spacing: 0.15em;
+    }
+
+    #snake-close-btn {
+      background: var(--red);
+      border: none;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem;
+      padding: 2px 10px;
+      cursor: pointer;
+    }
+
+    #snake-hud {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 12px;
+      font-size: 0.72rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0, 255, 65, 0.03);
+    }
+
+    #snake-hud span {
+      color: var(--text-dim);
+    }
+
+    #snake-hud span b {
+      color: var(--green);
+    }
+
+    #snake-canvas {
+      display: block;
+    }
+
+    #snake-msg {
+      position: absolute;
+      inset: 34px 0 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background: rgba(0, 0, 0, 0.86);
+      gap: 10px;
+    }
+
+    #snake-msg.hidden {
+      display: none;
+    }
+
+    .snake-msg-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--green);
+      text-shadow: var(--glow);
+      letter-spacing: 0.2em;
+    }
+
+    .snake-msg-sub {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+    }
+
+    .snake-start-btn {
+      padding: 9px 28px;
+      border: 1px solid var(--green);
+      background: transparent;
+      color: var(--green);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.76rem;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: all 0.2s;
+    }
+
+    .snake-start-btn:hover {
+      background: var(--green);
+      color: #000;
+      box-shadow: var(--glow);
+    }
+
+    #snake-mobile-controls {
+      display: none;
+      margin-top: 8px;
+      gap: 5px;
+    }
+
+    @media (max-width: 768px) {
+      #snake-mobile-controls {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    .snake-dpad-row {
+      display: flex;
+      gap: 5px;
+    }
+
+    .snake-dpad-btn {
+      width: 52px;
+      height: 52px;
+      background: rgba(0, 255, 65, 0.07);
+      border: 1px solid var(--border);
+      color: var(--green);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .snake-dpad-btn:active {
+      background: rgba(0, 255, 65, 0.25);
+    }
+
+    /* SHUTDOWN */
+    #shutdown-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    #shutdown-screen.on {
+      display: flex;
+    }
+
+    .shutdown-text {
+      font-family: 'VT323', monospace;
+      font-size: 2rem;
+      color: var(--green);
+      text-align: center;
+    }
+
+    /* NEOFETCH MODAL */
+    #neofetch-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 800;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #neofetch-modal.on {
+      display: flex;
+    }
+
+    #neofetch-box {
+      border: 1px solid var(--green);
+      padding: 24px;
+      max-width: 480px;
+      width: 92%;
+      background: #000;
+      font-size: 0.82rem;
+      line-height: 1.8;
+    }
+
+    #neofetch-close {
+      margin-top: 14px;
+      padding: 6px 18px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+
+    /* MUTE */
+    #mute-btn {
+      position: fixed;
+      bottom: 14px;
+      right: 14px;
+      z-index: 800;
+      background: rgba(0, 0, 0, 0.88);
+      border: 1px solid var(--border);
+      color: var(--green);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #mute-btn:hover {
+      border-color: var(--green);
+      box-shadow: var(--glow);
+    }
+
+    #mute-btn.muted {
+      color: rgba(0, 255, 65, 0.3);
+      border-color: rgba(0, 255, 65, 0.15);
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 3px;
+      height: 3px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--green);
+    }
+
+    /* GLITCH */
+    @keyframes glitch {
+      0% {
+        text-shadow: 2px 0 var(--red), -2px 0 var(--cyan);
+        transform: translate(0)
+      }
+
+      20% {
+        text-shadow: -2px 0 var(--red), 2px 0 var(--cyan);
+        transform: translate(-2px, 1px)
+      }
+
+      40% {
+        text-shadow: 2px 0 var(--red), -2px 0 var(--cyan);
+        transform: translate(2px, -1px)
+      }
+
+      60% {
+        text-shadow: -2px 0 var(--red), 2px 0 var(--cyan);
+        transform: translate(0)
+      }
+
+      80%,
+      100% {
+        text-shadow: none;
+        transform: translate(0)
+      }
+    }
+
+    .glitch {
+      animation: glitch 4s infinite;
+    }
+
+    /* PARTICLE */
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9000;
+      font-size: 1rem;
+      animation: particleFly 0.8s ease forwards;
+    }
+
+    @keyframes particleFly {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.4)
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE — MOBILE
+    ══════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      body {
+        overflow: auto;
+        height: auto;
+        cursor: default;
+      }
+
+      #os {
+        height: auto;
+      }
+
+      #desktop {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        height: auto;
+      }
+
+      #sidebar {
+        grid-row: auto;
+        width: 100%;
+      }
+
+      #main-content {
+        min-height: 65vh;
+        width: 100%;
+      }
+
+      #log-panel {
+        min-height: 120px;
+      }
+
+      #taskbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+
+      .taskbar-left {
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      .taskbar-btn {
+        font-size: 0.68rem;
+        padding: 3px 7px;
+      }
+
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .q-options {
+        grid-template-columns: 1fr;
+      }
+
+      .boss-sprite {
+        font-size: 3rem;
+      }
+
+      .boot-logo {
+        font-size: 2rem;
+      }
+
+      #terminal-output {
+        font-size: 0.76rem;
+      }
+
+      #terminal-input {
+        font-size: 0.76rem;
+      }
+
+      .snake-msg-title {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SCANLINES OVERLAY -->
+  <div id="scanlines"></div>
+
+  <!-- BOOT SCREEN -->
+  <div id="boot-screen">
+    <div class="boot-logo">MOHIT.EXE</div>
+    <div id="boot-lines"></div>
+    <div id="boot-progress">
+      <div id="boot-bar"></div>
+    </div>
+  </div>
+
+  <!-- MAIN OS -->
+  <div id="os">
+    <!-- TASKBAR -->
+    <div id="taskbar">
+      <div class="taskbar-left">
+        <span class="os-logo">⬡ PORTFOLIO_OS v2.0</span>
+        <button class="taskbar-btn active" onclick="switchSection('terminal')">TERMINAL</button>
+        <button class="taskbar-btn" onclick="switchSection('about')">ABOUT.EXE</button>
+        <button class="taskbar-btn" onclick="switchSection('skills')">SKILL_TREE</button>
+        <button class="taskbar-btn" onclick="switchSection('projects')">PROJECTS</button>
+        <button class="taskbar-btn" onclick="switchSection('boss')">⚔ CONTACT</button>
+      </div>
+      <div class="taskbar-right">
+        <span>MEM: 420MB</span>
+        <span>CPU: <span id="cpu-val">13</span>%</span>
+        <button id="theme-btn" onclick="cycleTheme()">THEME: GREEN</button>
+        <span id="clock">00:00:00</span>
+      </div>
+    </div>
+
+    <!-- DESKTOP -->
+    <div id="desktop">
+
+      <!-- SIDEBAR -->
+      <div class="panel" id="sidebar">
+        <div class="panel-title">SYSTEM_USER.DAT</div>
+        <div id="avatar-section">
+          <div class="avatar-frame">
+            <svg class="avatar-svg" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="30" y="10" width="30" height="30" fill="#00ff41" rx="2" />
+              <rect x="35" y="18" width="6" height="6" fill="#000" />
+              <rect x="49" y="18" width="6" height="6" fill="#000" />
+              <rect x="36" y="30" width="18" height="3" fill="#000" rx="1" />
+              <rect x="25" y="40" width="40" height="35" fill="#00cc33" rx="3" />
+              <rect x="15" y="42" width="12" height="20" fill="#00ff41" rx="2" />
+              <rect x="63" y="42" width="12" height="20" fill="#00ff41" rx="2" />
+              <rect x="30" y="75" width="12" height="12" fill="#00ff41" rx="2" />
+              <rect x="48" y="75" width="12" height="12" fill="#00ff41" rx="2" />
+              <rect x="35" y="47" width="6" height="6" fill="#000" />
+              <rect x="49" y="47" width="6" height="6" fill="#000" />
+            </svg>
+            <div class="avatar-ring"></div>
+          </div>
+          <div class="dev-name glitch">MOHIT.DEV</div>
+          <div class="dev-title">Full Stack Dev · AI Enthusiast</div>
+          <div class="status-badge">● OPEN TO WORK</div>
+        </div>
+
+        <!-- XP TRACKER -->
+        <div id="xp-tracker">
+          <div class="xp-tracker-label"><span>EXPLORER LEVEL: <b id="xp-level-label">1</b></span><span
+              id="xp-pts-label">0 / 10 XP</span></div>
+          <div class="xp-tracker-bar">
+            <div class="xp-tracker-fill" id="xp-tracker-fill"></div>
+          </div>
+        </div>
+
+        <div id="nav-menu">
+          <div class="nav-item active" onclick="switchSection('terminal')"><span class="nav-icon">$</span> TERMINAL
+          </div>
+          <div class="nav-item" onclick="switchSection('about')"><span class="nav-icon">👤</span> ABOUT</div>
+          <div class="nav-item" onclick="switchSection('skills')"><span class="nav-icon">🌳</span> SKILL TREE</div>
+          <div class="nav-item" onclick="switchSection('projects')"><span class="nav-icon">📁</span> PROJECTS</div>
+          <div class="nav-item" onclick="switchSection('boss')"><span class="nav-icon">👹</span> CONTACT BOSS</div>
+          <div class="nav-item" onclick="openSnake()"><span class="nav-icon">🐍</span> SNAKE.EXE</div>
+        </div>
+
+        <div id="achievement-sidebar">
+          <div class="achieve-title">🏆 ACHIEVEMENTS (<span id="achieve-count">0</span>/10)</div>
+          <div class="badge-grid">
+            <div class="badge" id="badge-curious" title="Curious Human — Stayed 30s">👁</div>
+            <div class="badge" id="badge-hacker" title="Elite Hacker — Typed help">💻</div>
+            <div class="badge" id="badge-explorer" title="Explorer — Viewed all sections">🗺</div>
+            <div class="badge" id="badge-gamer" title="True Gamer — Played Snake">🎮</div>
+            <div class="badge" id="badge-hunter" title="Secret Hunter — sudo hire-me">🥚</div>
+            <div class="badge" id="badge-boss" title="Boss Slayer — Defeated boss">⚔</div>
+            <div class="badge" id="badge-matrix" title="Matrix Initiate — matrix cmd">🟩</div>
+            <div class="badge" id="badge-konami" title="Konami Master — ↑↑↓↓←→←→BA">⬆</div>
+            <div class="badge" id="badge-neofetch" title="Sysadmin — ran neofetch">🖥</div>
+            <div class="badge" id="badge-shutdown" title="Chaos Agent — shutdown">💀</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div class="panel" id="main-content">
+        <div class="panel-title" id="main-title">TERMINAL_v2.0.0</div>
+
+        <!-- ── TERMINAL ── -->
+        <div class="content-section active" id="terminal-section">
+          <div id="terminal-content">
+            <div id="terminal-path">📂 mohit@portfolio: ~/</div>
+            <div id="terminal-output"></div>
+            <div id="tab-hint"></div>
+            <div id="terminal-input-row">
+              <span class="prompt-label" id="prompt-label">mohit@portfolio:~$</span>
+              <input type="text" id="terminal-input" placeholder="type 'help' to begin..." autocomplete="off"
+                spellcheck="false" aria-label="Terminal input">
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ABOUT ── -->
+        <div class="content-section" id="about-section">
+          <div id="about-content">
+            <div class="section-header">// ABOUT_ME.JSON</div>
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-label">Level</div>
+                <div class="stat-value">18 🔥</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">XP</div>
+                <div class="stat-value">88,420</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Class</div>
+                <div class="stat-value">Dev Mage</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Guild</div>
+                <div class="stat-value">Open Source</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Projects Shipped</div>
+                <div class="stat-value">24+</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Bugs Squashed</div>
+                <div class="stat-value">9,999+</div>
+              </div>
+            </div>
+            <div class="bio-text">
+              Greetings, traveler. I'm Mohit — a full-stack developer who builds digital realms by day and games by
+              night. I started coding at 16 and never stopped. My weapon of choice? JavaScript and Python. My weakness?
+              Perfectly centered divs and dark patterns in games I shouldn't be playing.
+            </div>
+            <div class="bio-text">
+              I specialize in scalable web apps, AI-powered tools, and occasionally things that probably shouldn't
+              exist. If you've made it this far, we're already friends.
+            </div>
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div class="stat-label">Location</div>
+                <div class="stat-value">🇮🇳 India</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Timezone</div>
+                <div class="stat-value">IST (UTC+5:30)</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Response Time</div>
+                <div class="stat-value">&lt; 24hrs</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Tea/Day</div>
+                <div class="stat-value">∞ cups</div>
+              </div>
+            </div>
+            <div class="link-row">
+              <a class="ext-link" href="https://github.com/sutharmohit575" target="_blank" rel="noopener">⬡ GitHub</a>
+              <a class="ext-link" href="https://linkedin.com/in/suthar-mohit575" target="_blank" rel="noopener">💼
+                LinkedIn</a>
+              <a class="ext-link" href="https://mail.google.com/mail/?view=cm&fs=1&to=sutharmohit575@gmail.com"
+                target="_blank" rel="noopener">📧 Email</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SKILLS ── -->
+        <div class="content-section" id="skills-section">
+          <div id="skills-content">
+            <div class="section-header">// SKILL_TREE.RPG</div>
+            <div class="skill-tree">
+              <div
+                style="font-family:'Orbitron',sans-serif;font-size:0.65rem;color:var(--cyan);margin-bottom:7px;letter-spacing:0.1em;">
+                ⚡ FRONTEND</div>
+              <div class="tree-branch"><span class="tree-connector">├─</span> <span
+                  class="tree-node active-node">HTML5</span> <span class="xp-bar"><span class="xp-fill"
+                    style="width:95%"></span></span>95%</div>
+              <div class="tree-branch"><span class="tree-connector">│ └─</span> <span class="tree-node">Canvas
+                  API</span> <span class="xp-bar"><span class="xp-fill" style="width:80%"></span></span>80%</div>
+              <div class="tree-branch"><span class="tree-connector">│ └─</span> <span class="tree-node">WebGL /
+                  Three.js</span> <span class="xp-bar"><span class="xp-fill" style="width:65%"></span></span>65%</div>
+              <div class="tree-branch"><span class="tree-connector">├─</span> <span class="tree-node">CSS3 +
+                  Tailwind</span> <span class="xp-bar"><span class="xp-fill" style="width:90%"></span></span>90%</div>
+              <div class="tree-branch"><span class="tree-connector">│ └─</span> <span
+                  class="tree-node">Animations</span> <span class="xp-bar"><span class="xp-fill"
+                    style="width:85%"></span></span>85%</div>
+              <div class="tree-branch"><span class="tree-connector">└─</span> <span class="tree-node">React /
+                  Next.js</span> <span class="xp-bar"><span class="xp-fill" style="width:88%"></span></span>88%</div>
+            </div>
+            <div class="skill-tree">
+              <div
+                style="font-family:'Orbitron',sans-serif;font-size:0.65rem;color:var(--orange);margin-bottom:7px;letter-spacing:0.1em;">
+                🔥 BACKEND</div>
+              <div class="tree-branch"><span class="tree-connector">├─</span> <span class="tree-node">Node.js</span>
+                <span class="xp-bar"><span class="xp-fill" style="width:85%"></span></span>85%
+              </div>
+              <div class="tree-branch"><span class="tree-connector">├─</span> <span class="tree-node">Python +
+                  FastAPI</span> <span class="xp-bar"><span class="xp-fill" style="width:82%"></span></span>82%</div>
+              <div class="tree-branch"><span class="tree-connector">│ └─</span> <span class="tree-node">AI / ML</span>
+                <span class="xp-bar"><span class="xp-fill" style="width:70%"></span></span>70%
+              </div>
+              <div class="tree-branch"><span class="tree-connector">└─</span> <span class="tree-node">PostgreSQL +
+                  MongoDB</span> <span class="xp-bar"><span class="xp-fill" style="width:78%"></span></span>78%</div>
+            </div>
+            <div class="skill-tree">
+              <div
+                style="font-family:'Orbitron',sans-serif;font-size:0.65rem;color:var(--yellow);margin-bottom:7px;letter-spacing:0.1em;">
+                ⚙ DEVOPS & TOOLS</div>
+              <div class="tree-branch"><span class="tree-connector">├─</span> <span class="tree-node">Docker +
+                  AWS</span> <span class="xp-bar"><span class="xp-fill" style="width:75%"></span></span>75%</div>
+              <div class="tree-branch"><span class="tree-connector">└─</span> <span class="tree-node">Git + CI/CD</span>
+                <span class="xp-bar"><span class="xp-fill" style="width:90%"></span></span>90%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── PROJECTS ── -->
+        <div class="content-section" id="projects-section">
+          <div id="projects-content">
+            <div class="section-header">// PROJECTS.DIR</div>
+            <div class="project-card" onclick="addXP(2)">
+              <span class="biome-label">🏜 DESERT BIOME</span>
+              <div class="project-name">⚡ NEURALCHAT</div>
+              <div class="project-desc">AI-powered real-time chat with multi-model support, custom memory, and plugin
+                system. 2k+ active users.</div>
+              <div class="project-tags"><span class="tag">React</span><span class="tag">WebSocket</span><span
+                  class="tag">OpenAI</span><span class="tag">Redis</span></div>
+              <div class="project-links">
+                <button class="proj-btn" onclick="event.stopPropagation();terminalGoto('open neuralchat')">$
+                  open</button>
+                <button class="proj-btn" onclick="event.stopPropagation()">↗ live demo</button>
+              </div>
+            </div>
+            <div class="project-card" onclick="addXP(2)">
+              <span class="biome-label">🏜 DESERT BIOME</span>
+              <div class="project-name">🛒 PIXELMART</div>
+              <div class="project-desc">Full-stack e-commerce with real-time inventory, AI recommendations, and Stripe
+                checkout.</div>
+              <div class="project-tags"><span class="tag">Next.js</span><span class="tag">Stripe</span><span
+                  class="tag">PostgreSQL</span><span class="tag">Vercel</span></div>
+              <div class="project-links">
+                <button class="proj-btn" onclick="event.stopPropagation();terminalGoto('open pixelmart')">$
+                  open</button>
+                <button class="proj-btn" onclick="event.stopPropagation()">↗ live demo</button>
+              </div>
+            </div>
+            <div class="project-card" onclick="addXP(2)">
+              <span class="biome-label">🔥 NETHER BIOME</span>
+              <div class="project-name">🤖 JOBAI</div>
+              <div class="project-desc">AI-powered hiring platform with smart Resume Builder, Resume Analyzer &amp; ATS scoring — helping job seekers stand out and recruiters find the right fit.</div>
+              <div class="project-tags"><span class="tag">Python</span><span class="tag">Django</span><span
+                  class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span><span class="tag">Railway</span></div>
+              <div class="project-links">
+                <button class="proj-btn" onclick="event.stopPropagation();window.open('https://jobai-sutharmohit-575.up.railway.app','_blank')">🚀 Live</button>
+                <button class="proj-btn" onclick="event.stopPropagation();window.open('https://github.com/sutharmohit575/jobai','_blank')">⭐ GitHub</button>
+              </div>
+            </div>
+            <div class="project-card" onclick="addXP(2)">
+              <span class="biome-label">🌌 END BIOME</span>
+              <div class="project-name">🤖 AUTOSCRIBE</div>
+              <div class="project-desc">AI document intelligence — extract, summarize, and query any file. Used by 500+
+                businesses.</div>
+              <div class="project-tags"><span class="tag">Python</span><span class="tag">LangChain</span><span
+                  class="tag">FastAPI</span><span class="tag">Pinecone</span></div>
+              <div class="project-links">
+                <button class="proj-btn" onclick="event.stopPropagation();terminalGoto('open autoscribe')">$
+                  open</button>
+                <button class="proj-btn" onclick="event.stopPropagation()">↗ live demo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── BOSS FIGHT ── -->
+        <div class="content-section" id="boss-section">
+          <div id="boss-content">
+            <div class="boss-arena">
+              <div class="boss-title">👹 BOSS FIGHT</div>
+              <div class="boss-subtitle">DEFEAT THE CONTACT BOSS TO UNLOCK MOHIT'S LINKS</div>
+              <span class="boss-sprite" id="boss-sprite">👾</span>
+              <div class="boss-hp-label"><span>BOSS HP</span><span id="hp-text">100 / 100</span></div>
+              <div class="boss-hp-bar">
+                <div class="boss-hp-fill" id="hp-fill" style="width:100%"></div>
+              </div>
+
+              <div id="boss-questions">
+                <div class="question-card">
+                  <div class="q-label">QUESTION 1 — What brings you here?</div>
+                  <div class="q-options">
+                    <button class="q-btn" onclick="selectQ(1,this,'Freelance Project')">Freelance Project</button>
+                    <button class="q-btn" onclick="selectQ(1,this,'Full-time Role')">Full-time Role</button>
+                    <button class="q-btn" onclick="selectQ(1,this,'Collab / Open Source')">Collab / Open Source</button>
+                    <button class="q-btn" onclick="selectQ(1,this,'Just Exploring')">Just Exploring</button>
+                  </div>
+                </div>
+                <div class="question-card">
+                  <div class="q-label">QUESTION 2 — Which project interested you?</div>
+                  <div class="q-options">
+                    <button class="q-btn" onclick="selectQ(2,this,'NeuralChat')">NeuralChat</button>
+                    <button class="q-btn" onclick="selectQ(2,this,'PixelMart')">PixelMart</button>
+                    <button class="q-btn" onclick="selectQ(2,this,'CryptoVault')">CryptoVault</button>
+                    <button class="q-btn" onclick="selectQ(2,this,'AutoScribe')">AutoScribe</button>
+                  </div>
+                </div>
+                <div class="question-card">
+                  <div class="q-label">QUESTION 3 — Your name & email</div>
+                  <div style="display:grid;gap:7px;margin-top:7px">
+                    <input id="contact-name" type="text" placeholder="Your name..." aria-label="Your name"
+                      style="background:rgba(255,0,60,0.05);border:1px solid rgba(255,0,60,0.3);color:#fff;padding:7px 11px;font-family:'Share Tech Mono',monospace;font-size:0.79rem;outline:none;width:100%"
+                      oninput="updateQ3()">
+                    <input id="contact-email" type="email" placeholder="your@email.com..." aria-label="Your email"
+                      style="background:rgba(255,0,60,0.05);border:1px solid rgba(255,0,60,0.3);color:#fff;padding:7px 11px;font-family:'Share Tech Mono',monospace;font-size:0.79rem;outline:none;width:100%"
+                      oninput="updateQ3()">
+                  </div>
+                </div>
+                <button id="boss-submit" onclick="defeatBoss()">⚔ STRIKE THE BOSS (SEND MESSAGE)</button>
+              </div>
+
+              <div id="boss-victory">
+                <div style="font-size:3.5rem;margin-bottom:10px">💥</div>
+                <div class="victory-text">BOSS DEFEATED!</div>
+                <div style="margin-top:10px;color:rgba(0,255,65,0.8);font-size:0.8rem">Message transmitted. Mohit will
+                  respawn shortly.</div>
+                <div class="loot-box">
+                  <div class="loot-title">🎁 LOOT DROPPED</div>
+                  <div class="loot-links">
+                    <a class="loot-link" href="https://github.com/sutharmohit575" target="_blank" rel="noopener">⬡
+                      GitHub</a>
+                    <a class="loot-link" href="https://linkedin.com/in/suthar-mohit575" target="_blank"
+                      rel="noopener">💼 LinkedIn</a>
+                    <a class="loot-link" href="https://mail.google.com/mail/?view=cm&fs=1&to=sutharmohit575@gmail.com"
+                      target="_blank" rel="noopener">📧 Email</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end main-content -->
+
+      <!-- LOG PANEL -->
+      <div class="panel" id="log-panel">
+        <div class="panel-title">SYSTEM_LOG.TXT</div>
+        <div id="log-body" aria-live="polite" aria-atomic="false"></div>
+      </div>
+
+    </div><!-- end desktop -->
+  </div><!-- end os -->
+
+  <!-- MUTE BUTTON -->
+  <button id="mute-btn" onclick="toggleMute()" aria-label="Toggle sound effects">🔊 SFX: ON</button>
+
+  <!-- XP BAR -->
+  <div id="xp-bar-wrap">
+    <div id="xp-bar-fill"></div>
+  </div>
+  <div id="xp-label"></div>
+
+  <!-- ACHIEVEMENT POPUP -->
+  <div id="achieve-popup" role="alert" aria-live="assertive">
+    <span class="ap-icon" id="ap-icon">🏆</span>
+    <div class="ap-label">ACHIEVEMENT UNLOCKED</div>
+    <div class="ap-name" id="ap-name">Achievement</div>
+  </div>
+
+  <!-- MATRIX RAIN -->
+  <div id="matrix-rain" role="dialog" aria-label="Matrix rain effect">
+    <canvas id="matrix-canvas"></canvas>
+    <button id="matrix-close" onclick="closeMatrix()">[ CLOSE MATRIX ]</button>
+  </div>
+
+  <!-- SNAKE OVERLAY -->
+  <div id="snake-overlay" role="dialog" aria-label="Snake game">
+    <div id="snake-wrapper">
+      <div id="snake-titlebar">
+        <span>🐍 SNAKE.EXE — v2.0</span>
+        <button id="snake-close-btn" onclick="closeSnake()">✕ EXIT</button>
+      </div>
+      <div id="snake-hud">
+        <span>SCORE: <b id="snake-score">0</b></span>
+        <span>HIGH: <b id="snake-hi">0</b></span>
+        <span>LEVEL: <b id="snake-level">1</b></span>
+        <span>LIVES: <b id="snake-lives">♥♥♥</b></span>
+      </div>
+      <div style="position:relative;">
+        <canvas id="snake-canvas" width="380" height="380"></canvas>
+        <div id="snake-msg">
+          <div class="snake-msg-title" id="snake-msg-title">SNAKE.EXE</div>
+          <div class="snake-msg-sub" id="snake-msg-sub">Arrow keys / WASD to move</div>
+          <button class="snake-start-btn" id="snake-start-btn" onclick="startSnake()">▶ START GAME</button>
+        </div>
+      </div>
+      <div id="snake-mobile-controls">
+        <div class="snake-dpad-row"><button class="snake-dpad-btn" onclick="snakeDpad('ArrowUp')"
+            aria-label="Up">▲</button></div>
+        <div class="snake-dpad-row">
+          <button class="snake-dpad-btn" onclick="snakeDpad('ArrowLeft')" aria-label="Left">◀</button>
+          <button class="snake-dpad-btn" onclick="snakeDpad('ArrowDown')" aria-label="Down">▼</button>
+          <button class="snake-dpad-btn" onclick="snakeDpad('ArrowRight')" aria-label="Right">▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KONAMI -->
+  <div id="konami-msg" role="dialog" aria-label="Secret page">
+    <div class="konami-title">⬆⬆⬇⬇⬅➡⬅➡ B A</div>
+    <div style="font-family:'VT323',monospace;font-size:1.7rem;color:var(--green)">YOU FOUND THE KONAMI CODE!</div>
+    <div style="font-size:0.82rem;color:rgba(0,255,65,0.6);margin-top:10px">Achievement unlocked: ⬆ KONAMI
+      MASTER<br>Secret: Mohit's fav game is Hollow Knight 🦋</div>
+    <button class="konami-close" onclick="closeKonami()">CLOSE SECRET</button>
+  </div>
+
+  <!-- NEOFETCH MODAL -->
+  <div id="neofetch-modal" role="dialog" aria-label="System info">
+    <div id="neofetch-box">
+      <pre id="neofetch-content" style="color:var(--green);font-size:0.78rem;line-height:1.7"></pre>
+      <button id="neofetch-close" onclick="document.getElementById('neofetch-modal').classList.remove('on')">[ CLOSE
+        ]</button>
+    </div>
+  </div>
+
+  <!-- SHUTDOWN SCREEN -->
+  <div id="shutdown-screen">
+    <div class="shutdown-text" id="shutdown-text">It is now safe to turn off your computer.</div>
+    <div style="font-size:0.75rem;color:rgba(0,255,65,0.4);margin-top:8px;font-family:'Share Tech Mono',monospace">[
+      press any key to restart ]</div>
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <script>
+    // ═══════════════════════════════════════════════════════
+    // 🔊 SOUND ENGINE
+    // ═══════════════════════════════════════════════════════
+    let audioCtx = null, isMuted = false;
+    function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+    function playTone({ type = 'square', freq = 440, freq2, duration = 0.12, volume = 0.18, attack = 0.005, decay = 0.05, sustain = 0.6, release = 0.1, delay = 0, detune = 0 } = {}) {
+      if (isMuted) return;
+      const ctx = getCtx();
+      setTimeout(() => {
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        if (freq2) osc.frequency.linearRampToValueAtTime(freq2, ctx.currentTime + duration);
+        osc.detune.setValueAtTime(detune, ctx.currentTime);
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + attack);
+        gain.gain.linearRampToValueAtTime(volume * sustain, ctx.currentTime + attack + decay);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration + release);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration + release + 0.05);
+      }, delay);
+    }
+    function playNoise({ duration = 0.1, volume = 0.08, freq = 800, q = 5, freq2, delay = 0 } = {}) {
+      if (isMuted) return;
+      const ctx = getCtx();
+      setTimeout(() => {
+        const bufSize = ctx.sampleRate * duration, buf = ctx.createBuffer(1, bufSize, ctx.sampleRate), data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+        const src = ctx.createBufferSource(); src.buffer = buf;
+        const filter = ctx.createBiquadFilter(); filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(freq, ctx.currentTime);
+        if (freq2) filter.frequency.linearRampToValueAtTime(freq2, ctx.currentTime + duration);
+        filter.Q.value = q;
+        const gain = ctx.createGain(); gain.gain.setValueAtTime(volume, ctx.currentTime); gain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
+        src.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+        src.start(ctx.currentTime); src.stop(ctx.currentTime + duration + 0.05);
+      }, delay);
+    }
+    const SFX = {
+      bootBeep(i) { const f = [220, 277, 330, 415, 523, 622, 784, 880, 1047, 1318]; playTone({ type: 'square', freq: f[i] || 440, duration: 0.06, volume: 0.12, attack: 0.002, release: 0.04 }); },
+      bootComplete() { [[523, 0], [659, 80], [784, 160], [1047, 240]].forEach(([f, d]) => playTone({ type: 'triangle', freq: f, duration: 0.18, volume: 0.22, delay: d, attack: 0.01, release: 0.12 })); },
+      keyClick() { playNoise({ duration: 0.04, volume: 0.13, freq: 3500, q: 2 }); playTone({ type: 'square', freq: 180, freq2: 80, duration: 0.03, volume: 0.05, attack: 0.001, release: 0.02 }); },
+      termEnter() { playNoise({ duration: 0.07, volume: 0.2, freq: 1200, q: 3 }); playTone({ type: 'sawtooth', freq: 120, freq2: 60, duration: 0.08, volume: 0.12, attack: 0.002, release: 0.06 }); },
+      termError() { playTone({ type: 'sawtooth', freq: 80, freq2: 60, duration: 0.25, volume: 0.2, attack: 0.005, sustain: 0.8, release: 0.15 }); playNoise({ duration: 0.15, volume: 0.1, freq: 600, q: 1, delay: 60 }); },
+      termSuccess() { playTone({ type: 'triangle', freq: 784, duration: 0.14, volume: 0.2, attack: 0.01, release: 0.1 }); playTone({ type: 'triangle', freq: 1047, duration: 0.12, volume: 0.15, delay: 110, attack: 0.01, release: 0.1 }); },
+      navClick() { playTone({ type: 'sine', freq: 660, freq2: 880, duration: 0.07, volume: 0.14, attack: 0.003, release: 0.05 }); playNoise({ duration: 0.03, volume: 0.06, freq: 5000, q: 4 }); },
+      hover() { playTone({ type: 'sine', freq: 1200, duration: 0.03, volume: 0.05, attack: 0.001, release: 0.02 }); },
+      achievement() { [[523, 0], [659, 90], [784, 180], [1047, 270], [784, 360], [1047, 430], [1318, 510]].forEach(([f, d]) => playTone({ type: 'square', freq: f, duration: 0.13, volume: 0.2, delay: d, attack: 0.005, decay: 0.03, sustain: 0.7, release: 0.08 })); },
+      bossHit() { playNoise({ duration: 0.18, volume: 0.28, freq: 200, q: 1.5, freq2: 60 }); playTone({ type: 'sawtooth', freq: 110, freq2: 55, duration: 0.2, volume: 0.2, attack: 0.003, sustain: 0.6, release: 0.15 }); },
+      bossSpawn() { for (let i = 0; i < 4; i++) playNoise({ duration: 0.25, volume: 0.18, freq: 80 + i * 20, q: 2, delay: i * 120 }); playTone({ type: 'sawtooth', freq: 55, freq2: 80, duration: 0.8, volume: 0.15, attack: 0.05, sustain: 0.5, release: 0.4 }); },
+      bossDefeat() { playNoise({ duration: 0.6, volume: 0.35, freq: 120, q: 0.8, freq2: 30 });[[392, 300], [523, 420], [659, 540], [784, 660], [1047, 780], [1318, 900]].forEach(([f, d]) => playTone({ type: 'square', freq: f, duration: 0.15, volume: 0.22, delay: d, attack: 0.005, decay: 0.04, sustain: 0.7, release: 0.1 })); },
+      matrixOpen() { for (let i = 0; i < 6; i++) { playNoise({ duration: 0.08, volume: 0.12, freq: 2000 + Math.random() * 3000, q: 3, delay: i * 60 }); playTone({ type: 'sawtooth', freq: 100 + Math.random() * 800, duration: 0.06, volume: 0.08, delay: i * 60 + 20 }); } },
+      konami() { [[330, 0], [330, 100], [330, 200], [262, 300], [330, 400], [392, 500], [196, 600]].forEach(([f, d]) => playTone({ type: 'square', freq: f, duration: 0.14, volume: 0.22, delay: d, attack: 0.005, sustain: 0.8, release: 0.08 })); },
+      cardHover() { playTone({ type: 'sine', freq: 523, freq2: 659, duration: 0.06, volume: 0.08, attack: 0.002, release: 0.04 }); },
+      nodeClick() { playTone({ type: 'triangle', freq: 880, duration: 0.1, volume: 0.15, attack: 0.003, release: 0.07 }); playTone({ type: 'sine', freq: 1175, duration: 0.08, volume: 0.1, delay: 60, attack: 0.002, release: 0.05 }); },
+      xpUp() { playTone({ type: 'sine', freq: 660, freq2: 880, duration: 0.15, volume: 0.18, attack: 0.01, release: 0.1 }); },
+      levelUp() { [[660, 0], [880, 100], [1100, 200], [1320, 300]].forEach(([f, d]) => playTone({ type: 'triangle', freq: f, duration: 0.15, volume: 0.25, delay: d, attack: 0.005, release: 0.1 })); },
+      muteOn() { playTone({ type: 'sine', freq: 880, freq2: 440, duration: 0.12, volume: 0.18 }); },
+      muteOff() { playTone({ type: 'sine', freq: 440, freq2: 880, duration: 0.12, volume: 0.18 }); },
+      afk() { playTone({ type: 'sine', freq: 330, duration: 0.5, volume: 0.1, attack: 0.1, sustain: 0.4, release: 0.3 }); },
+      shutdown() { for (let i = 0; i < 5; i++) playTone({ type: 'sawtooth', freq: 200 - i * 30, duration: 0.3, volume: 0.15, delay: i * 200, attack: 0.01, release: 0.25 }); },
+    };
+    function toggleMute() {
+      isMuted = !isMuted;
+      const btn = document.getElementById('mute-btn');
+      btn.textContent = isMuted ? '🔇 SFX: OFF' : '🔊 SFX: ON';
+      btn.classList.toggle('muted', isMuted);
+      if (!isMuted) { SFX.muteOff(); } else { const tmp = isMuted; isMuted = false; SFX.muteOn(); isMuted = tmp; }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // XP / LEVEL SYSTEM
+    // ═══════════════════════════════════════════════════════
+    let xpTotal = 0, xpLevel = 1;
+    const XP_PER_LEVEL = 10;
+    function addXP(amt, label) {
+      xpTotal += amt;
+      SFX.xpUp();
+      const lvlBefore = xpLevel;
+      while (xpTotal >= xpLevel * XP_PER_LEVEL) xpLevel++;
+      if (xpLevel > lvlBefore) { SFX.levelUp(); showXPLabel(`🎉 LEVEL UP! Explorer Lv.${xpLevel}`); addLog('XP', `Level up! Now Explorer Lv.${xpLevel}`, 'warn'); }
+      else showXPLabel(`+${amt} XP — ${label || 'action'}`);
+      updateXPUI();
+      spawnParticles('+' + amt + 'XP');
+    }
+    function updateXPUI() {
+      const fill = document.getElementById('xp-tracker-fill');
+      const lvlEl = document.getElementById('xp-level-label');
+      const ptsEl = document.getElementById('xp-pts-label');
+      const curLvlXP = (xpLevel - 1) * XP_PER_LEVEL;
+      const nextLvlXP = xpLevel * XP_PER_LEVEL;
+      const pct = Math.min(100, ((xpTotal - curLvlXP) / (nextLvlXP - curLvlXP)) * 100);
+      if (fill) fill.style.width = pct + '%';
+      if (lvlEl) lvlEl.textContent = xpLevel;
+      if (ptsEl) ptsEl.textContent = (xpTotal - curLvlXP) + ' / ' + (nextLvlXP - curLvlXP) + ' XP';
+      // bottom bar
+      document.getElementById('xp-bar-fill').style.width = pct + '%';
+    }
+    let xpLabelTimer;
+    function showXPLabel(txt) {
+      const el = document.getElementById('xp-label');
+      el.textContent = txt; el.classList.add('show');
+      clearTimeout(xpLabelTimer); xpLabelTimer = setTimeout(() => el.classList.remove('show'), 2000);
+    }
+    function spawnParticles(text) {
+      for (let i = 0; i < 3; i++) {
+        const p = document.createElement('div'); p.className = 'particle';
+        p.textContent = text;
+        p.style.left = (Math.random() * 80 + 10) + 'vw';
+        p.style.top = (Math.random() * 60 + 20) + 'vh';
+        p.style.animationDelay = (i * 0.1) + 's';
+        p.style.color = 'var(--yellow)';
+        p.style.fontSize = '0.75rem';
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 1200);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // BOOT SEQUENCE
+    // ═══════════════════════════════════════════════════════
+    const bootLines = [
+      { text: 'Initializing PORTFOLIO_OS v2.0...', cls: '', delay: 150 },
+      { text: 'Loading kernel modules...', cls: 'ok', delay: 300 },
+      { text: 'Mounting /dev/mohit...', cls: 'ok', delay: 450 },
+      { text: 'Scanning for threats...', cls: 'fail', delay: 600 },
+      { text: 'Importing 9999 npm packages...', cls: 'ok', delay: 750 },
+      { text: 'Detecting gamer profile... CONFIRMED', cls: 'ok', delay: 900 },
+      { text: 'Loading easter eggs...', cls: 'ok', delay: 1050 },
+      { text: 'Starting achievement system...', cls: 'ok', delay: 1200 },
+      { text: 'Mounting filesystem /projects /skills...', cls: 'ok', delay: 1350 },
+      { text: 'XP tracker online...', cls: 'ok', delay: 1500 },
+      { text: 'Spawning boss...', cls: 'warn', delay: 1650 },
+      { text: 'System ready. Welcome, traveler.', cls: '', delay: 1800 },
+    ];
+    const bootLinesEl = document.getElementById('boot-lines');
+    const bootBar = document.getElementById('boot-bar');
+    document.addEventListener('click', () => { if (!audioCtx) getCtx(); }, { once: true });
+    document.addEventListener('keydown', () => { if (!audioCtx) getCtx(); }, { once: true });
+    bootLines.forEach((line, i) => {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = `boot-line ${line.cls}`;
+        el.textContent = '> ' + line.text;
+        bootLinesEl.appendChild(el);
+        bootBar.style.width = ((i + 1) / bootLines.length * 100) + '%';
+        SFX.bootBeep(i);
+        if (i === bootLines.length - 1) {
+          SFX.bootComplete();
+          setTimeout(() => {
+            document.getElementById('boot-screen').style.display = 'none';
+            document.getElementById('os').style.display = 'flex';
+            initOS();
+          }, 500);
+        }
+      }, line.delay);
+    });
+
+    // ═══════════════════════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════════════════════
+    const sectionsVisited = new Set();
+    function initOS() {
+      updateClock(); setInterval(updateClock, 1000);
+      setInterval(updateCPU, 2500);
+      terminalWelcome();
+      setTimeout(() => { unlockAchievement('curious'); addXP(1, 'just being curious'); }, 30000);
+      addLog('SYSTEM', 'Portfolio OS v2.0 initialized.', '');
+      addLog('INFO', 'Guest session started. Welcome!', 'warn');
+      addLog('DEBUG', 'Type "help" for commands.', '');
+      document.getElementById('terminal-input').focus();
+      // Hover sounds
+      document.querySelectorAll('.nav-item').forEach(el => el.addEventListener('mouseenter', () => SFX.hover()));
+      document.querySelectorAll('.taskbar-btn').forEach(el => el.addEventListener('mouseenter', () => SFX.hover()));
+      document.querySelectorAll('.project-card').forEach(el => el.addEventListener('mouseenter', () => SFX.cardHover()));
+      document.querySelectorAll('.tree-node').forEach(el => { el.addEventListener('click', () => SFX.nodeClick()); el.addEventListener('mouseenter', () => SFX.hover()); });
+    }
+    function updateClock() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', { hour12: false }); }
+    function updateCPU() { document.getElementById('cpu-val').textContent = Math.floor(Math.random() * 20 + 10); }
+
+    // ═══════════════════════════════════════════════════════
+    // THEME CYCLE
+    // ═══════════════════════════════════════════════════════
+    const themes = ['green', 'amber', 'win95', 'hc'];
+    const themeLabels = { green: 'GREEN', amber: 'AMBER', win95: 'WIN95', hc: 'HIGH-C' };
+    let themeIdx = 0;
+    function cycleTheme() {
+      document.body.classList.remove('theme-' + themes[themeIdx]);
+      themeIdx = (themeIdx + 1) % themes.length;
+      const t = themes[themeIdx];
+      if (t !== 'green') document.body.classList.add('theme-' + t);
+      document.getElementById('theme-btn').textContent = 'THEME: ' + themeLabels[t];
+      document.body.classList.toggle('crt-off', t === 'win95');
+      addLog('THEME', `Switched to ${themeLabels[t]}`, 'warn');
+      SFX.navClick();
+      addXP(1, 'theme explorer');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // SECTIONS
+    // ═══════════════════════════════════════════════════════
+    const sectionTitles = { terminal: 'TERMINAL_v2.0.0', about: 'ABOUT_ME.JSON', skills: 'SKILL_TREE.RPG', projects: 'PROJECTS.DIR', boss: 'CONTACT_BOSS.EXE ⚠' };
+    function switchSection(name) {
+      SFX.navClick();
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.taskbar-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(name + '-section').classList.add('active');
+      document.getElementById('main-title').textContent = sectionTitles[name];
+      const names = ['terminal', 'about', 'skills', 'projects', 'boss'];
+      document.querySelectorAll('.taskbar-btn')[names.indexOf(name)]?.classList.add('active');
+      document.querySelectorAll('.nav-item').forEach((n, i) => { if (i === names.indexOf(name)) n.classList.add('active'); });
+      addLog('NAV', `→ ${sectionTitles[name]}`, '');
+      addXP(1, 'section visited');
+      sectionsVisited.add(name);
+      if (sectionsVisited.size >= 5) { unlockAchievement('explorer'); }
+      if (name === 'boss') {
+        setTimeout(() => { document.getElementById('boss-content').style.display = 'flex'; }, 40);
+        addLog('WARN', 'BOSS SPAWNED. Prepare yourself.', 'crit');
+        SFX.bossSpawn();
+      }
+      if (name === 'terminal') setTimeout(() => document.getElementById('terminal-input').focus(), 100);
+    }
+    function terminalGoto(cmd) {
+      switchSection('terminal');
+      setTimeout(() => {
+        const input = document.getElementById('terminal-input');
+        input.value = cmd;
+        input.focus();
+      }, 200);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // VIRTUAL FILE SYSTEM
+    // ═══════════════════════════════════════════════════════
+    let cwd = '~';
+    const FS = {
+      '~': { type: 'dir', children: ['projects', 'skills', 'about', 'resume.txt'] },
+      '~/projects': { type: 'dir', children: ['neuralchat', 'pixelmart', 'jobai', 'autoscribe'] },
+      '~/projects/neuralchat': { type: 'file', content: ['NAME:    NeuralChat', 'STACK:   React, WebSocket, OpenAI, Redis', 'STATUS:  ● Live — 2k+ users', 'DEMO:    neuralchat.mohit.dev', 'DESC:    AI-powered real-time chat with multi-model support.'] },
+      '~/projects/pixelmart': { type: 'file', content: ['NAME:    PixelMart', 'STACK:   Next.js, Stripe, PostgreSQL, Vercel', 'STATUS:  ● Live', 'DEMO:    pixelmart.mohit.dev', 'DESC:    Full-stack e-commerce with AI recommendations.'] },
+      '~/projects/jobai': { type: 'file', content: ['NAME:    JobAI', 'STACK:   Python, Django, HTML, CSS, JavaScript, Railway', 'STATUS:  ● Live', 'DEMO:    jobai-sutharmohit-575.up.railway.app', 'REPO:    github.com/sutharmohit575/jobai', 'DESC:    AI-powered hiring platform with Resume Builder, Resume Analyzer & ATS scoring.'] },
+      '~/projects/autoscribe': { type: 'file', content: ['NAME:    AutoScribe', 'STACK:   Python, LangChain, FastAPI, Pinecone', 'STATUS:  ● Live — 500+ biz', 'DEMO:    autoscribe.mohit.dev', 'DESC:    AI document intelligence tool.'] },
+      '~/skills': { type: 'dir', children: ['frontend', 'backend', 'devops'] },
+      '~/skills/frontend': { type: 'file', content: ['HTML5 ███████████ 95%', 'CSS3   ██████████░ 90%', 'React  █████████░░ 88%', 'Canvas ████████░░░ 80%', 'WebGL  ██████░░░░░ 65%'] },
+      '~/skills/backend': { type: 'file', content: ['Node.js  █████████░░ 85%', 'Python   █████████░░ 82%', 'FastAPI  █████████░░ 80%', 'AI/ML    ███████░░░░ 70%', 'Postgres ████████░░░ 78%'] },
+      '~/skills/devops': { type: 'file', content: ['Docker   ████████░░░ 75%', 'AWS      ████████░░░ 75%', 'Git      ██████████░ 90%', 'CI/CD    ██████████░ 90%'] },
+      '~/about': { type: 'dir', children: ['bio.json', 'contact.json'] },
+      '~/about/bio.json': { type: 'file', content: ['{ "name": "Mohit", "role": "Full Stack Dev", "level": 42, "location": "India",', '  "skills": ["JS", "Python", "React", "Node", "AI"],', '  "status": "open to work", "coffee_per_day": "∞" }'] },
+      '~/about/contact.json': { type: 'file', content: ['{ "email": "sutharmohit575@gmail.com",', '  "github": "github.com/sutharmohit575",', '  "linkedin": "linkedin.com/in/suthar-mohit575",', '  "response_time": "< 24 hours" }'] },
+      '~/resume.txt': { type: 'file', content: ['MOHIT — Full Stack Developer', '━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'Email:    sutharmohit575@gmail.com', 'GitHub:   github.com/sutharmohit575', 'LinkedIn: linkedin.com/in/suthar-mohit575', '', 'EXPERIENCE', '• 4+ years full-stack development', '• 24+ shipped projects', '• Open to: Freelance & Full-time', '', 'Rate: Let\'s talk. I\'m worth it.'] },
+    };
+    function fsResolve(p) {
+      if (!p || p === '~') return '~';
+      if (p.startsWith('~/')) return p;
+      if (p === '..') {
+        const parts = cwd.split('/');
+        return parts.length <= 1 ? '~' : parts.slice(0, -1).join('/') || '~';
+      }
+      return cwd + '/' + p;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // TERMINAL
+    // ═══════════════════════════════════════════════════════
+    const output = document.getElementById('terminal-output');
+    const input = document.getElementById('terminal-input');
+    let cmdHistory = [], historyIdx = -1;
+
+    function updatePrompt() {
+      document.getElementById('prompt-label').textContent = `mohit@portfolio:${cwd}$`;
+      document.getElementById('terminal-path').textContent = `📂 mohit@portfolio: ${cwd}/`;
+    }
+    function printLines(lines) {
+      lines.forEach(l => { const d = document.createElement('div'); d.className = 't-line ' + (l.cls || 't-out'); d.textContent = l.text; output.appendChild(d); });
+      output.scrollTop = output.scrollHeight;
+    }
+    function printLine(text, cls = 't-out') { const d = document.createElement('div'); d.className = 't-line ' + cls; d.textContent = text; output.appendChild(d); output.scrollTop = output.scrollHeight; }
+    function printPrompt(cmd) { const d = document.createElement('div'); d.className = 't-line'; d.innerHTML = `<span class="t-prompt">mohit@portfolio:${cwd}$</span> <span class="t-cmd">${escHtml(cmd)}</span>`; output.appendChild(d); }
+
+    function terminalWelcome() {
+      printLines([
+        { cls: 't-success', text: '╔══════════════════════════════════════════════╗' },
+        { cls: 't-success', text: '║     PORTFOLIO_OS v2.0 — MOHIT.EXE            ║' },
+        { cls: 't-success', text: '║     Type "help" to see all commands          ║' },
+        { cls: 't-success', text: '╚══════════════════════════════════════════════╝' },
+        { cls: 't-out', text: '' },
+        { cls: 't-out', text: 'Welcome, traveler. This OS contains secrets.' },
+        { cls: 't-dim', text: 'Tip: use Tab to autocomplete, ↑↓ for history, "neofetch" for sysinfo.' },
+        { cls: 't-out', text: '' },
+      ]);
+    }
+
+    function escHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    // COMMANDS
+    const allCommands = ['help', 'about', 'skills', 'projects', 'contact', 'snake', 'matrix', 'neofetch', 'ls', 'cd', 'cat', 'pwd', 'clear', 'whoami', 'hack', 'echo', 'theme', 'shutdown', 'hollowknight', 'tea', 'debug', 'sudo hire-me', 'open neuralchat', 'open pixelmart', 'open jobai', 'open autoscribe'];
+
+    const commands = {
+      help: () => {
+        printLines([
+          { cls: 't-info', text: '─── COMMANDS ────────────────────────────────────' },
+          { cls: 't-out', text: '  about / skills / projects / contact' },
+          { cls: 't-out', text: '  snake          → play Snake.EXE' },
+          { cls: 't-out', text: '  matrix         → enter the Matrix' },
+          { cls: 't-out', text: '  neofetch       → system info' },
+          { cls: 't-out', text: '  sudo hire-me   → secret resume' },
+          { cls: 't-out', text: '  ls / cd / cat  → filesystem navigation' },
+          { cls: 't-out', text: '  pwd            → print working directory' },
+          { cls: 't-out', text: '  echo <msg>     → echo message' },
+          { cls: 't-out', text: '  theme          → cycle color theme' },
+          { cls: 't-out', text: '  whoami / hack / clear' },
+          { cls: 't-dim', text: '  (+ hidden commands — explore to find them)' },
+          { cls: 't-info', text: '─────────────────────────────────────────────────' },
+        ]);
+        unlockAchievement('hacker'); addXP(1, 'help accessed');
+      },
+      about: () => { SFX.termSuccess(); switchSection('about'); printLine('Opening ABOUT_ME.JSON...', 't-success'); addXP(1, 'about viewed'); },
+      skills: () => { SFX.termSuccess(); switchSection('skills'); printLine('Loading SKILL_TREE.RPG...', 't-success'); addXP(1, 'skills viewed'); },
+      projects: () => { SFX.termSuccess(); switchSection('projects'); printLine('Mounting ~/projects ...', 't-success'); addXP(1, 'projects viewed'); },
+      contact: () => { switchSection('boss'); printLine('⚠ SUMMONING THE BOSS...', 't-err'); addXP(1, 'boss summoned'); },
+      whoami: () => { printLines([{ cls: 't-out', text: '> SCANNING USER...' }, { cls: 't-info', text: '> Detected: Curious human with good taste.' }, { cls: 't-out', text: '> That alone makes you 73% cooler than average.' }]); },
+      hack: () => { printLines([{ cls: 't-err', text: 'ACCESS GRANTED' }, { cls: 't-err', text: 'Just kidding. You wish.' }, { cls: 't-out', text: 'Seriously though — hi. Glad you found this.' }]); },
+      matrix: () => { printLine('Entering the Matrix...', 't-success'); SFX.matrixOpen(); setTimeout(openMatrix, 500); },
+      clear: () => { output.innerHTML = ''; },
+      pwd: () => { printLine(cwd, 't-out'); },
+      ls: (args) => {
+        const path = args[0] ? fsResolve(args[0]) : cwd;
+        const node = FS[path];
+        if (!node) { printLine(`ls: cannot access '${args[0] || cwd}': No such file or directory`, 't-err'); return; }
+        if (node.type === 'dir') { node.children.forEach(c => printLine(c, 't-out')); }
+        else { printLine(`ls: '${path}' is a file, not a directory`, 't-err'); }
+        addXP(1, 'filesystem explored');
+      },
+      cd: (args) => {
+        if (!args[0] || args[0] === '~') { cwd = '~'; updatePrompt(); return; }
+        const p = fsResolve(args[0]);
+        if (!FS[p]) { printLine(`cd: no such directory: ${args[0]}`, 't-err'); SFX.termError(); return; }
+        if (FS[p].type !== 'dir') { printLine(`cd: not a directory: ${args[0]}`, 't-err'); SFX.termError(); return; }
+        cwd = p; updatePrompt(); addXP(1, 'cd navigation');
+      },
+      cat: (args) => {
+        if (!args[0]) { printLine('cat: missing argument', 't-err'); SFX.termError(); return; }
+        const p = fsResolve(args[0]);
+        const node = FS[p];
+        if (!node) { printLine(`cat: ${args[0]}: No such file`, 't-err'); SFX.termError(); return; }
+        if (node.type === 'dir') { printLine(`cat: ${args[0]}: Is a directory`, 't-err'); SFX.termError(); return; }
+        node.content.forEach(l => printLine(l, 't-out'));
+        addXP(2, 'file read');
+      },
+      echo: (args) => { if (args.length) printLine(args.join(' '), 't-out'); },
+      neofetch: () => {
+        showNeofetch();
+        printLine('Opening neofetch...', 't-success');
+        unlockAchievement('neofetch'); addXP(2, 'neofetch run');
+      },
+      theme: () => { cycleTheme(); printLine('Theme changed.', 't-success'); },
+      snake: () => { SFX.termSuccess(); printLine('🐍 Launching SNAKE.EXE...', 't-success'); setTimeout(openSnake, 400); unlockAchievement('gamer'); addXP(2, 'snake launched'); },
+      shutdown: () => {
+        SFX.shutdown(); printLine('Initiating shutdown sequence...', 't-err');
+        unlockAchievement('shutdown'); addXP(3, 'chaos agent');
+        setTimeout(() => {
+          document.getElementById('shutdown-screen').classList.add('on');
+          document.addEventListener('keydown', restartFromShutdown);
+          document.addEventListener('click', restartFromShutdown);
+        }, 2000);
+      },
+      hollowknight: () => {
+        printLines([
+          { cls: 't-info', text: '> Loading save file: The Pale Court...' },
+          { cls: 't-out', text: '> Hollow Knight. Best game Mohit has ever played.' },
+          { cls: 't-out', text: '> 112% completion. No regrets.' },
+          { cls: 't-dim', text: '> "No eyes to meet. No voice to answer."' },
+        ]);
+        addXP(3, 'hollow knight discovered');
+      },
+      tea: () => { printLines([{ cls: 't-info', text: '> Brewing tea...' }, { cls: 't-out', text: '> chai.execute() → ☕ Perfect cup detected.' }, { cls: 't-dim', text: '> Mohit runs on chai. (Not coffee. Real answer.)' }]); addXP(1, 'tea brewed'); },
+      debug: () => {
+        printLines([
+          { cls: 't-info', text: '─── DEBUG INFO ─────────────────────────────────' },
+          { cls: 't-out', text: `  XP Total: ${xpTotal}  |  Level: ${xpLevel}` },
+          { cls: 't-out', text: `  Achievements: ${Array.from(unlocked).join(', ') || 'none yet'}` },
+          { cls: 't-out', text: `  Sections visited: ${Array.from(sectionsVisited).join(', ') || 'none yet'}` },
+          { cls: 't-out', text: `  Snake hi-score: ${snakeHiScore}` },
+          { cls: 't-out', text: `  Theme: ${themes[themeIdx]}` },
+          { cls: 't-info', text: '─────────────────────────────────────────────────' },
+        ]);
+        addXP(2, 'debug accessed');
+      },
+      'sudo hire-me': () => {
+        SFX.termSuccess(); SFX.achievement();
+        printLines([
+          { cls: 't-success', text: '🔓 ROOT ACCESS GRANTED' },
+          { cls: 't-info', text: '─── MOHIT\'S RESUME ──────────────────────────────' },
+          { cls: 't-out', text: '  📧 sutharmohit575@gmail.com' },
+          { cls: 't-out', text: '  ⬡  github.com/sutharmohit575' },
+          { cls: 't-out', text: '  💼 linkedin.com/in/suthar-mohit575' },
+          { cls: 't-out', text: '' },
+          { cls: 't-out', text: '  Available for: Freelance & Full-time' },
+          { cls: 't-out', text: '  Rate: Let\'s talk. I\'m not cheap. I\'m worth it.' },
+          { cls: 't-info', text: '─────────────────────────────────────────────────' },
+        ]);
+        unlockAchievement('hunter'); addXP(5, 'secret found');
+      },
+      'open neuralchat': () => { printLine('Opening NeuralChat... → neuralchat.mohit.dev', 't-success'); addXP(1, 'project opened'); },
+      'open pixelmart': () => { printLine('Opening PixelMart... → pixelmart.mohit.dev', 't-success'); addXP(1, 'project opened'); },
+      'open jobai': () => { printLine('Opening JobAI... → jobai-sutharmohit-575.up.railway.app', 't-success'); window.open('https://jobai-sutharmohit-575.up.railway.app', '_blank'); addXP(1, 'project opened'); },
+      'open autoscribe': () => { printLine('Opening AutoScribe... → autoscribe.mohit.dev', 't-success'); addXP(1, 'project opened'); },
+    };
+    // aliases
+    commands['h'] = commands['help'];
+    commands['cls'] = commands['clear'];
+    commands['dir'] = commands['ls'];
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const cmd = input.value.trim();
+        if (!cmd) return;
+        SFX.termEnter();
+        cmdHistory.unshift(cmd); historyIdx = -1;
+        printPrompt(cmd);
+        document.getElementById('tab-hint').textContent = '';
+        input.value = '';
+        const cmdLow = cmd.toLowerCase();
+        // check for echo specially
+        if (cmdLow.startsWith('echo ')) { commands.echo(cmd.slice(5).trim().split(' ')); return; }
+        // check for ls with args
+        if (cmdLow.startsWith('ls ')) { commands.ls([cmd.slice(3).trim()]); return; }
+        // check for cd with args
+        if (cmdLow.startsWith('cd ')) { commands.cd([cmd.slice(3).trim()]); return; }
+        // check for cat with args
+        if (cmdLow.startsWith('cat ')) { commands.cat([cmd.slice(4).trim()]); return; }
+        if (commands[cmdLow]) {
+          commands[cmdLow]([]);
+        } else {
+          SFX.termError();
+          const roasts = [
+            `Command not found: "${cmd}". But keep trying, champ.`,
+            `"${cmd}" — nope. Type "help" you absolute legend.`,
+            `Interesting attempt. That command doesn't exist here.`,
+            `sudo make-coffee → Not found. Try sudo hire-me instead.`,
+            `"${cmd}" threw NullPointerException (in your brain).`,
+            `Error 404: "${cmd}" not found. Have you tried "help"?`,
+          ];
+          printLine(roasts[Math.floor(Math.random() * roasts.length)], 't-err');
+        }
+      }
+      if (e.key.length === 1) SFX.keyClick();
+      if (e.key === 'Backspace') SFX.keyClick();
+      if (e.key === 'ArrowUp') { SFX.hover(); e.preventDefault(); historyIdx = Math.min(historyIdx + 1, cmdHistory.length - 1); input.value = cmdHistory[historyIdx] || ''; }
+      if (e.key === 'ArrowDown') { e.preventDefault(); historyIdx = Math.max(historyIdx - 1, -1); input.value = historyIdx >= 0 ? cmdHistory[historyIdx] : ''; }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const partial = input.value.trim().toLowerCase();
+        const matches = allCommands.filter(c => c.startsWith(partial) && c !== partial);
+        if (matches.length === 1) { input.value = matches[0]; document.getElementById('tab-hint').textContent = ''; }
+        else if (matches.length > 1) { document.getElementById('tab-hint').textContent = '→ ' + matches.join('  '); }
+      }
+    });
+
+    // ═══════════════════════════════════════════════════════
+    // NEOFETCH
+    // ═══════════════════════════════════════════════════════
+    function showNeofetch() {
+      const now = new Date();
+      const uptime = Math.floor((now - performance.timeOrigin) / 1000);
+      const content = `
+        .~.   ${getCtx() ? '🔊' : '🔇'}  mohit@portfolio
+       /  \\   ─────────────────────────────
+      | () |  OS:       Portfolio_OS v2.0
+       \\  /   HOST:     mohit.dev
+        ||    KERNEL:   JS-5.0-LTS
+        ||    UPTIME:   ${uptime}s
+              SHELL:    mohit-sh
+              THEME:    ${themes[themeIdx].toUpperCase()}
+              LEVEL:    Explorer Lv.${xpLevel}
+              XP:       ${xpTotal} total
+              ACHIEV:   ${unlocked.size}/10 unlocked
+              SNAKE_HI: ${snakeHiScore}
+              CPU:      Vibes × ∞
+              MEM:      420MB (caffeine)
+              LANG:     JS · Python · Rust
+              EDITOR:   VS Code (vim cope)
+              GAME:     Hollow Knight 🦋
+  `.trim();
+      document.getElementById('neofetch-content').textContent = content;
+      document.getElementById('neofetch-modal').classList.add('on');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // BOSS FIGHT
+    // ═══════════════════════════════════════════════════════
+    let bossHP = 100, answers = { q1: null, q2: null, q3: false };
+    function selectQ(num, btn, value) {
+      btn.closest('.question-card').querySelectorAll('.q-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      if (num === 1) answers.q1 = value;
+      if (num === 2) answers.q2 = value;
+      damageBA();
+    }
+    function updateQ3() {
+      const name = document.getElementById('contact-name').value.trim();
+      const email = document.getElementById('contact-email').value.trim();
+      if (name.length > 0 && email.includes('@') && !answers.q3) { answers.q3 = true; damageBA(); }
+    }
+    function damageBA() {
+      const n = [answers.q1, answers.q2, answers.q3].filter(Boolean).length;
+      bossHP = 100 - n * 33; if (bossHP < 1) bossHP = 1;
+      document.getElementById('hp-fill').style.width = bossHP + '%';
+      document.getElementById('hp-text').textContent = `${bossHP} / 100`;
+      document.getElementById('boss-sprite').textContent = ['👾', '😤', '😡', '💀'][Math.min(n, 3)];
+      SFX.bossHit(); addLog('BOSS', `Hit! HP: ${bossHP}`, 'crit');
+      addXP(2, 'boss damaged');
+    }
+    function defeatBoss() {
+      if (!answers.q1 || !answers.q2 || !answers.q3) { addLog('BOSS', 'Answer all questions first!', 'warn'); SFX.termError(); return; }
+      document.getElementById('hp-fill').style.width = '0%';
+      document.getElementById('hp-text').textContent = '0 / 100';
+      document.getElementById('boss-sprite').textContent = '💀';
+      setTimeout(() => {
+        document.getElementById('boss-questions').style.display = 'none';
+        document.getElementById('boss-victory').style.display = 'block';
+        SFX.bossDefeat(); unlockAchievement('boss'); addXP(10, 'boss defeated');
+        addLog('BOSS', 'BOSS DEFEATED! Loot dropped.', 'crit');
+      }, 600);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // ACHIEVEMENTS
+    // ═══════════════════════════════════════════════════════
+    const achievements = {
+      curious: { icon: '👁', name: 'Curious Human' },
+      hacker: { icon: '💻', name: 'Elite Hacker' },
+      explorer: { icon: '🗺', name: 'Explorer' },
+      gamer: { icon: '🎮', name: 'True Gamer' },
+      hunter: { icon: '🥚', name: 'Secret Hunter' },
+      boss: { icon: '⚔', name: 'Boss Slayer' },
+      matrix: { icon: '🟩', name: 'Matrix Initiate' },
+      konami: { icon: '⬆', name: 'Konami Master' },
+      neofetch: { icon: '🖥', name: 'Sysadmin' },
+      shutdown: { icon: '💀', name: 'Chaos Agent' },
+    };
+    const unlocked = new Set();
+    function unlockAchievement(key) {
+      if (unlocked.has(key)) return;
+      unlocked.add(key);
+      const a = achievements[key];
+      const badge = document.getElementById('badge-' + key);
+      if (badge) badge.classList.add('unlocked');
+      SFX.achievement();
+      const popup = document.getElementById('achieve-popup');
+      document.getElementById('ap-icon').textContent = a.icon;
+      document.getElementById('ap-name').textContent = a.name;
+      popup.style.display = 'block';
+      setTimeout(() => { popup.style.display = 'none'; }, 3500);
+      document.getElementById('achieve-count').textContent = unlocked.size;
+      addLog('ACHIEVEMENT', `Unlocked: ${a.name} ${a.icon}`, 'warn');
+      addXP(5, 'achievement unlocked');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // SYSTEM LOG
+    // ═══════════════════════════════════════════════════════
+    function addLog(type, msg, cls) {
+      const now = new Date().toLocaleTimeString('en-US', { hour12: false });
+      const div = document.createElement('div');
+      div.className = 'log-entry ' + (cls || '');
+      div.innerHTML = `<span class="log-time">[${now}]</span><span class="log-msg">[${type}] ${escHtml(msg)}</span>`;
+      const body = document.getElementById('log-body');
+      body.appendChild(div); body.scrollTop = body.scrollHeight;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // MATRIX RAIN
+    // ═══════════════════════════════════════════════════════
+    function openMatrix() {
+      document.getElementById('matrix-rain').style.display = 'block';
+      SFX.matrixOpen();
+      unlockAchievement('matrix'); addXP(3, 'matrix entered');
+      const canvas = document.getElementById('matrix-canvas');
+      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      const ctx = canvas.getContext('2d');
+      const cols = Math.floor(canvas.width / 14), drops = Array(cols).fill(1);
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789アイウエオカキクケコサシスセソ';
+      function drawMatrix() {
+        ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#00ff41'; ctx.font = '13px Share Tech Mono';
+        drops.forEach((y, i) => {
+          ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * 14, y * 14);
+          if (y * 14 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+          drops[i]++;
+        });
+      }
+      window.matrixInterval = setInterval(drawMatrix, 45);
+    }
+    function closeMatrix() { clearInterval(window.matrixInterval); document.getElementById('matrix-rain').style.display = 'none'; }
+
+    // ═══════════════════════════════════════════════════════
+    // KONAMI CODE
+    // ═══════════════════════════════════════════════════════
+    const KONAMI = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIdx = 0;
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement === input) return;
+      if (e.key === KONAMI[konamiIdx]) {
+        konamiIdx++;
+        if (konamiIdx === KONAMI.length) {
+          konamiIdx = 0;
+          document.getElementById('konami-msg').style.display = 'flex';
+          SFX.konami(); unlockAchievement('konami'); addXP(8, 'konami code!');
+        }
+      } else { konamiIdx = 0; }
+    });
+    function closeKonami() { document.getElementById('konami-msg').style.display = 'none'; }
+
+    // TITLE CLICK 5x → matrix
+    let titleClicks = 0;
+    document.getElementById('main-title').addEventListener('click', () => {
+      titleClicks++;
+      if (titleClicks >= 5) { titleClicks = 0; SFX.matrixOpen(); openMatrix(); addLog('SECRET', 'Hidden trigger activated!', 'warn'); }
+    });
+
+    // SHUTDOWN RESTART
+    function restartFromShutdown() {
+      document.getElementById('shutdown-screen').classList.remove('on');
+      document.removeEventListener('keydown', restartFromShutdown);
+      document.removeEventListener('click', restartFromShutdown);
+      addLog('SYSTEM', 'System restarted.', 'warn');
+    }
+
+    // AFK
+    let afkTimer;
+    function resetAFK() {
+      clearTimeout(afkTimer);
+      afkTimer = setTimeout(() => { addLog('INFO', 'AFK detected. Mohit.exe sleeping... 💤', 'warn'); SFX.afk(); }, 60000);
+    }
+    document.addEventListener('mousemove', resetAFK);
+    document.addEventListener('keydown', resetAFK);
+    resetAFK();
+
+    // ═══════════════════════════════════════════════════════
+    // SNAKE GAME
+    // ═══════════════════════════════════════════════════════
+    const SNAKE_GRID = 19, SNAKE_SIZE = 20;
+    const SNAKE_COLORS = { bg: '#050505', grid: '#0a1a0a', head: '#00ff41', body: '#00cc33', bodyDark: '#009922', food: '#ff003c', foodGlow: 'rgba(255,0,60,0.8)', special: '#ffff00' };
+    let snakeState = null, snakeLoop = null, snakeHiScore = 0;
+
+    function snakeSpeed(level) { return Math.max(80, 220 - level * 14); }
+    function isSnakeOpen() { return document.getElementById('snake-overlay').classList.contains('open'); }
+    function openSnake() { document.getElementById('snake-overlay').classList.add('open'); drawSnakeIdle(); showSnakeMsg('SNAKE.EXE', 'Arrow keys / WASD to move', '▶ START GAME'); SFX.navClick(); }
+    function closeSnake() { clearInterval(snakeLoop); snakeLoop = null; snakeState = null; document.getElementById('snake-overlay').classList.remove('open'); }
+    function showSnakeMsg(title, sub, btnTxt) { document.getElementById('snake-msg-title').textContent = title; document.getElementById('snake-msg-sub').textContent = sub; document.getElementById('snake-start-btn').textContent = btnTxt; document.getElementById('snake-msg').classList.remove('hidden'); }
+    function hideSnakeMsg() { document.getElementById('snake-msg').classList.add('hidden'); }
+
+    function initSnakeState() {
+      const cx = Math.floor(SNAKE_GRID / 2), cy = Math.floor(SNAKE_GRID / 2);
+      return { snake: [{ x: cx, y: cy }, { x: cx - 1, y: cy }, { x: cx - 2, y: cy }], dir: { x: 1, y: 0 }, nextDir: { x: 1, y: 0 }, food: null, specialFood: null, specialTimer: 0, score: 0, level: 1, lives: 3, eaten: 0, paused: false, dead: false };
+    }
+    function placeFood(s) {
+      let pos; const occupied = new Set(s.snake.map(p => p.x + ',' + p.y));
+      do { pos = { x: Math.floor(Math.random() * SNAKE_GRID), y: Math.floor(Math.random() * SNAKE_GRID) }; } while (occupied.has(pos.x + ',' + pos.y));
+      s.food = pos;
+    }
+    function placeSpecialFood(s) {
+      let pos; const occupied = new Set(s.snake.map(p => p.x + ',' + p.y));
+      do { pos = { x: Math.floor(Math.random() * SNAKE_GRID), y: Math.floor(Math.random() * SNAKE_GRID) }; } while (occupied.has(pos.x + ',' + pos.y));
+      s.specialFood = pos; s.specialTimer = 60;
+    }
+    function startSnake() {
+      hideSnakeMsg(); snakeState = initSnakeState(); placeFood(snakeState);
+      updateSnakeHUD(); clearInterval(snakeLoop);
+      snakeLoop = setInterval(snakeTick, snakeSpeed(snakeState.level));
+      document.getElementById('snake-canvas').focus();
+    }
+    function snakeTick() {
+      if (!snakeState || snakeState.paused || snakeState.dead) return;
+      const s = snakeState; s.dir = s.nextDir;
+      const head = { x: s.snake[0].x + s.dir.x, y: s.snake[0].y + s.dir.y };
+      if (head.x < 0 || head.x >= SNAKE_GRID || head.y < 0 || head.y >= SNAKE_GRID) { snakeDie(); return; }
+      for (let i = 0; i < s.snake.length - 1; i++) { if (s.snake[i].x === head.x && s.snake[i].y === head.y) { snakeDie(); return; } }
+      s.snake.unshift(head);
+      let grew = false;
+      if (s.food && head.x === s.food.x && head.y === s.food.y) {
+        grew = true; s.score += 10 * s.level; s.eaten++;
+        playSnakeEat(); placeFood(s);
+        if (s.eaten % 5 === 0 && !s.specialFood) placeSpecialFood(s);
+        if (s.eaten % 8 === 0) { s.level = Math.min(10, s.level + 1); clearInterval(snakeLoop); snakeLoop = setInterval(snakeTick, snakeSpeed(s.level)); }
+        if (s.score >= 100) { unlockAchievement('gamer'); addXP(5, 'snake score 100'); }
+      }
+      if (s.specialFood && head.x === s.specialFood.x && head.y === s.specialFood.y) { grew = true; s.score += 50 * s.level; s.specialFood = null; playSnakeSpecial(); addXP(3, 'special food'); }
+      if (s.specialFood) { s.specialTimer--; if (s.specialTimer <= 0) s.specialFood = null; }
+      if (!grew) s.snake.pop();
+      if (s.score > snakeHiScore) snakeHiScore = s.score;
+      updateSnakeHUD(); drawSnake();
+    }
+    function snakeDie() {
+      const s = snakeState; playSnakeDie(); s.lives--;
+      updateSnakeHUD();
+      if (s.lives <= 0) {
+        s.dead = true; clearInterval(snakeLoop); snakeLoop = null; drawSnake();
+        setTimeout(() => {
+          if (s.score > snakeHiScore) snakeHiScore = s.score;
+          showSnakeMsg('GAME OVER', `Score: ${s.score} | Best: ${snakeHiScore}`, '▶ PLAY AGAIN');
+          addLog('SNAKE', `Game over. Score: ${s.score}`, 'warn');
+        }, 400);
+      } else {
+        s.paused = true; drawSnake();
+        setTimeout(() => {
+          const cx = Math.floor(SNAKE_GRID / 2), cy = Math.floor(SNAKE_GRID / 2);
+          s.snake = [{ x: cx, y: cy }, { x: cx - 1, y: cy }, { x: cx - 2, y: cy }];
+          s.dir = { x: 1, y: 0 }; s.nextDir = { x: 1, y: 0 }; s.paused = false; placeFood(s);
+        }, 800);
+      }
+    }
+    function updateSnakeHUD() {
+      if (!snakeState) return;
+      document.getElementById('snake-score').textContent = snakeState.score;
+      document.getElementById('snake-hi').textContent = snakeHiScore;
+      document.getElementById('snake-level').textContent = snakeState.level;
+      document.getElementById('snake-lives').textContent = '♥'.repeat(snakeState.lives) + '♡'.repeat(Math.max(0, 3 - snakeState.lives));
+    }
+    function drawSnakeIdle() {
+      const canvas = document.getElementById('snake-canvas'), ctx = canvas.getContext('2d');
+      ctx.fillStyle = SNAKE_COLORS.bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = SNAKE_COLORS.grid; ctx.lineWidth = 0.5;
+      for (let x = 0; x <= SNAKE_GRID; x++) { ctx.beginPath(); ctx.moveTo(x * SNAKE_SIZE, 0); ctx.lineTo(x * SNAKE_SIZE, canvas.height); ctx.stroke(); }
+      for (let y = 0; y <= SNAKE_GRID; y++) { ctx.beginPath(); ctx.moveTo(0, y * SNAKE_SIZE); ctx.lineTo(canvas.width, y * SNAKE_SIZE); ctx.stroke(); }
+    }
+    function drawSnake() {
+      const canvas = document.getElementById('snake-canvas'), ctx = canvas.getContext('2d'), s = snakeState, sz = SNAKE_SIZE;
+      ctx.fillStyle = SNAKE_COLORS.bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = SNAKE_COLORS.grid; ctx.lineWidth = 0.5;
+      for (let x = 0; x <= SNAKE_GRID; x++) { ctx.beginPath(); ctx.moveTo(x * sz, 0); ctx.lineTo(x * sz, canvas.height); ctx.stroke(); }
+      for (let y = 0; y <= SNAKE_GRID; y++) { ctx.beginPath(); ctx.moveTo(0, y * sz); ctx.lineTo(canvas.width, y * sz); ctx.stroke(); }
+      ctx.strokeStyle = 'rgba(0,255,65,0.15)'; ctx.lineWidth = 2; ctx.strokeRect(1, 1, canvas.width - 2, canvas.height - 2);
+      if (s.food) {
+        const fx = s.food.x * sz + sz / 2, fy = s.food.y * sz + sz / 2;
+        ctx.shadowColor = SNAKE_COLORS.foodGlow; ctx.shadowBlur = 12;
+        ctx.fillStyle = SNAKE_COLORS.food; ctx.beginPath(); ctx.arc(fx, fy, sz / 2 - 2, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0; ctx.fillStyle = '#fff'; ctx.font = `bold ${sz * 0.55}px Share Tech Mono`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('✕', fx, fy + 1);
+      }
+      if (s.specialFood && s.specialTimer % 6 < 4) {
+        const sx2 = s.specialFood.x * sz + sz / 2, sy2 = s.specialFood.y * sz + sz / 2;
+        ctx.shadowColor = 'rgba(255,255,0,0.8)'; ctx.shadowBlur = 16;
+        ctx.fillStyle = SNAKE_COLORS.special; ctx.beginPath(); ctx.arc(sx2, sy2, sz / 2 - 1, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0; ctx.fillStyle = '#000'; ctx.font = `bold ${sz * 0.55}px Share Tech Mono`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('★', sx2, sy2 + 1);
+      }
+      s.snake.forEach((seg, i) => {
+        const isHead = i === 0, x = seg.x * sz, y = seg.y * sz, pad = isHead ? 1 : 2;
+        ctx.shadowColor = isHead ? 'rgba(0,255,65,0.8)' : 'rgba(0,255,65,0.15)'; ctx.shadowBlur = isHead ? 10 : 3;
+        ctx.fillStyle = isHead ? SNAKE_COLORS.head : (i % 2 === 0 ? SNAKE_COLORS.body : SNAKE_COLORS.bodyDark);
+        ctx.fillRect(x + pad, y + pad, sz - pad * 2, sz - pad * 2); ctx.shadowBlur = 0;
+        if (isHead) {
+          ctx.fillStyle = '#000';
+          const ex = s.dir.x === 1 ? sz * 0.65 : s.dir.x === -1 ? sz * 0.15 : sz * 0.28, ey = s.dir.y === 1 ? sz * 0.65 : s.dir.y === -1 ? sz * 0.15 : sz * 0.28;
+          const ex2 = s.dir.x !== 0 ? ex : sz * 0.72, ey2 = s.dir.y !== 0 ? ey : sz * 0.72;
+          ctx.beginPath(); ctx.arc(x + ex, y + ey, 2, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(x + ex2, y + ey2, 2, 0, Math.PI * 2); ctx.fill();
+        }
+      });
+      if (s.paused || s.dead) { ctx.fillStyle = 'rgba(255,0,60,0.12)'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+    }
+    document.addEventListener('keydown', (e) => {
+      if (!isSnakeOpen()) return;
+      const snakeKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd', 'W', 'A', 'S', 'D', 'Escape', 'p', 'P', 'Enter', ' '];
+      if (snakeKeys.includes(e.key)) e.preventDefault();
+      if ((e.key === 'Enter' || e.key === ' ') && !snakeState) { startSnake(); return; }
+      if (e.key === 'Escape') { closeSnake(); return; }
+      if (!snakeState) return;
+      if (e.key === 'p' || e.key === 'P') { snakeState.paused = !snakeState.paused; return; }
+      if (e.key === 'Enter' && snakeState.dead) { startSnake(); return; }
+      const dirs = { ArrowUp: { x: 0, y: -1 }, w: { x: 0, y: -1 }, W: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 }, s: { x: 0, y: 1 }, S: { x: 0, y: 1 }, ArrowLeft: { x: -1, y: 0 }, a: { x: -1, y: 0 }, A: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 }, d: { x: 1, y: 0 }, D: { x: 1, y: 0 } };
+      const nd = dirs[e.key];
+      if (nd && (nd.x !== -snakeState.dir.x || nd.y !== -snakeState.dir.y)) snakeState.nextDir = nd;
+    }, true);
+    function snakeDpad(key) {
+      if (!snakeState) return;
+      const dirs = { ArrowUp: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 }, ArrowLeft: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 } };
+      const nd = dirs[key];
+      if (nd && (nd.x !== -snakeState.dir.x || nd.y !== -snakeState.dir.y)) snakeState.nextDir = nd;
+    }
+    function playSnakeEat() { playTone({ type: 'square', freq: 440, freq2: 660, duration: 0.08, volume: 0.15 }); }
+    function playSnakeSpecial() { playTone({ type: 'square', freq: 660, duration: 0.05, volume: 0.2 }); playTone({ type: 'square', freq: 880, duration: 0.05, volume: 0.2, delay: 60 }); playTone({ type: 'square', freq: 1100, duration: 0.08, volume: 0.2, delay: 120 }); }
+    function playSnakeDie() { playNoise({ duration: 0.4, volume: 0.3, freq: 100, q: 1, freq2: 30 }); playTone({ type: 'sawtooth', freq: 100, freq2: 50, duration: 0.4, volume: 0.2, attack: 0.01, release: 0.3 }); }
+  </script>
+  <!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║   MOHIT.EXE — Chatbot UI Widget                              ║
+  ║   Drop this <script> + <style> block anywhere in index.html  ║
+  ║   just before </body>.                                       ║
+  ║                                                              ║
+  ║   Works in TWO modes:                                        ║
+  ║   1. STANDALONE (no server) — calls the built-in JS engine   ║
+  ║   2. API mode — calls POST http://localhost:8000/chat        ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+  <!-- ── CHATBOT STYLES ─────────────────────────────────────── -->
+  <style>
+    /* Launcher bubble */
+    #chat-launcher {
+      position: fixed;
+      bottom: 52px;
+      right: 14px;
+      z-index: 850;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 0 16px rgba(0, 255, 65, 0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: chatPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes chatPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 16px rgba(0, 255, 65, 0.5)
+      }
+
+      50% {
+        box-shadow: 0 0 28px rgba(0, 255, 65, 0.9), 0 0 48px rgba(0, 255, 65, 0.3)
+      }
+    }
+
+    #chat-launcher:hover {
+      transform: scale(1.12);
+    }
+
+    #chat-launcher.open {
+      background: linear-gradient(135deg, var(--red), #ff6600);
+      animation: none;
+    }
+
+    /* Chat window */
+    #chat-window {
+      position: fixed;
+      bottom: 110px;
+      right: 14px;
+      z-index: 850;
+      width: 340px;
+      max-height: 520px;
+      background: rgba(5, 10, 5, 0.98);
+      border: 1px solid var(--border);
+      box-shadow: 0 0 30px rgba(0, 255, 65, 0.15), 0 8px 40px rgba(0, 0, 0, 0.6);
+      display: none;
+      flex-direction: column;
+      font-family: 'Share Tech Mono', monospace;
+      transform-origin: bottom right;
+      overflow: hidden;
+    }
+
+    #chat-window.visible {
+      display: flex;
+      animation: chatOpen 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes chatOpen {
+      from {
+        transform: scale(0.7) translateY(20px);
+        opacity: 0
+      }
+
+      to {
+        transform: scale(1) translateY(0);
+        opacity: 1
+      }
+    }
+
+    /* Header */
+    #chat-header {
+      background: rgba(0, 255, 65, 0.08);
+      border-bottom: 1px solid var(--border);
+      padding: 9px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .chat-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      animation: spin 8s linear infinite;
+      border: 1px solid rgba(0, 255, 65, 0.4);
+    }
+
+    .chat-header-info {
+      flex: 1;
+    }
+
+    .chat-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+
+    .chat-status {
+      font-size: 0.6rem;
+      color: var(--green);
+    }
+
+    .chat-status::before {
+      content: '● ';
+    }
+
+    #chat-close {
+      background: none;
+      border: none;
+      color: var(--red);
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 2px 6px;
+      line-height: 1;
+    }
+
+    #chat-close:hover {
+      text-shadow: var(--red-glow);
+    }
+
+    /* DSA badge */
+    #chat-dsa-badge {
+      padding: 4px 14px;
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+      letter-spacing: 0.08em;
+      background: rgba(0, 255, 65, 0.02);
+      flex-shrink: 0;
+    }
+
+    #chat-dsa-badge span {
+      color: var(--yellow);
+    }
+
+    /* Messages */
+    #chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 12px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--green) transparent;
+    }
+
+    #chat-messages::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    #chat-messages::-webkit-scrollbar-thumb {
+      background: var(--green);
+    }
+
+    .chat-msg {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-width: 88%;
+    }
+
+    .chat-msg.bot {
+      align-self: flex-start;
+    }
+
+    .chat-msg.user {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .chat-bubble {
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-radius: 2px;
+    }
+
+    .chat-msg.bot .chat-bubble {
+      background: rgba(0, 255, 65, 0.07);
+      border: 1px solid var(--border);
+      color: var(--green);
+    }
+
+    .chat-msg.user .chat-bubble {
+      background: rgba(0, 255, 255, 0.08);
+      border: 1px solid rgba(0, 255, 255, 0.25);
+      color: var(--cyan);
+    }
+
+    .chat-meta {
+      font-size: 0.58rem;
+      color: var(--text-dim);
+      padding: 0 4px;
+    }
+
+    /* Intent badge */
+    .intent-badge {
+      display: inline-block;
+      font-size: 0.55rem;
+      padding: 1px 6px;
+      border: 1px solid var(--border);
+      color: var(--yellow);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* Typing indicator */
+    #chat-typing {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      padding: 0 12px 6px;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    #chat-typing.show {
+      display: flex;
+    }
+
+    .typing-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--green);
+      opacity: 0.4;
+      animation: typingBounce 1.2s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typingBounce {
+
+      0%,
+      60%,
+      100% {
+        opacity: 0.4;
+        transform: translateY(0)
+      }
+
+      30% {
+        opacity: 1;
+        transform: translateY(-4px)
+      }
+    }
+
+    /* Suggestions */
+    .chat-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding: 0 12px 8px;
+      flex-shrink: 0;
+    }
+
+    .chat-sugg-btn {
+      padding: 3px 9px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-dim);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.68rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chat-sugg-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* Input */
+    #chat-input-row {
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      flex-shrink: 0;
+      background: rgba(0, 255, 65, 0.03);
+    }
+
+    #chat-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.78rem;
+      caret-color: var(--green);
+    }
+
+    #chat-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    #chat-send {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--green);
+      font-size: 0.9rem;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    #chat-send:hover {
+      background: var(--green);
+      color: #000;
+      box-shadow: var(--glow);
+    }
+
+    /* Notification dot */
+    #chat-notif {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--red);
+      border: 2px solid var(--bg);
+      display: none;
+      animation: notifPop 0.3s ease;
+    }
+
+    @keyframes notifPop {
+      from {
+        transform: scale(0)
+      }
+
+      to {
+        transform: scale(1)
+      }
+    }
+
+    #chat-launcher {
+      position: fixed;
+      bottom: 52px;
+      right: 14px;
+    }
+
+    #chat-launcher-wrap {
+      position: fixed;
+      bottom: 52px;
+      right: 14px;
+      z-index: 850;
+    }
+
+    @media (max-width: 480px) {
+      #chat-window {
+        width: calc(100vw - 20px);
+        right: 10px;
+        bottom: 90px;
+        max-height: 60vh;
+      }
+    }
+  </style>
+
+  <!-- ── CHATBOT HTML ────────────────────────────────────────── -->
+  <div id="chat-launcher-wrap">
+    <button id="chat-launcher" onclick="toggleChat()" aria-label="Open chatbot" title="Chat with Mohit.exe">🤖</button>
+    <div id="chat-notif"></div>
+  </div>
+
+  <div id="chat-window" role="dialog" aria-label="Mohit.exe chatbot">
+    <div id="chat-header">
+      <div class="chat-avatar">⬡</div>
+      <div class="chat-header-info">
+        <div class="chat-name">MOHIT.EXE</div>
+        <div class="chat-status">online — ask me anything</div>
+      </div>
+      <button id="chat-close" onclick="toggleChat()" aria-label="Close chat">✕</button>
+    </div>
+    <div id="chat-dsa-badge">
+      DSA Engine: <span>Trie</span> · <span>LRU Cache</span> · <span>Min-Heap</span> · <span>BFS</span> ·
+      <span>Deque</span>
+    </div>
+    <div id="chat-messages" aria-live="polite"></div>
+    <div id="chat-typing">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <span style="font-size:0.65rem">Mohit.exe is thinking...</span>
+    </div>
+    <div class="chat-suggestions" id="chat-suggestions"></div>
+    <div id="chat-input-row">
+      <input id="chat-input" type="text" placeholder="Ask about skills, projects..." maxlength="200" autocomplete="off"
+        spellcheck="false" aria-label="Chat message" onkeydown="if(event.key==='Enter') sendChatMsg()">
+      <button id="chat-send" onclick="sendChatMsg()" aria-label="Send message">▶</button>
+    </div>
+  </div>
+
+  <!-- ── CHATBOT JS ENGINE (standalone — no server needed) ─── -->
+  <script>
+    (function () {
+      'use strict';
+
+      // ── TRIE ──────────────────────────────────────────────────
+      class TrieNode {
+        constructor() { this.children = {}; this.intent = null; this.isEnd = false; }
+      }
+      class Trie {
+        constructor() { this.root = new TrieNode(); }
+        insert(phrase, intent) {
+          let node = this.root;
+          for (const ch of phrase.toLowerCase()) {
+            if (!node.children[ch]) node.children[ch] = new TrieNode();
+            node = node.children[ch];
+          }
+          node.isEnd = true; node.intent = intent;
+        }
+        containsPhrase(text) {
+          const tokens = text.toLowerCase().match(/[a-z0-9']+/g) || [];
+          const n = tokens.length;
+          for (let w = n; w >= 1; w--) {
+            for (let s = 0; s <= n - w; s++) {
+              const phrase = tokens.slice(s, s + w).join(' ');
+              let node = this.root; let ok = true;
+              for (const ch of phrase) {
+                if (!node.children[ch]) { ok = false; break; }
+                node = node.children[ch];
+              }
+              if (ok && node.isEnd) return node.intent;
+            }
+          }
+          return null;
+        }
+      }
+
+      // ── LRU CACHE ─────────────────────────────────────────────
+      class LRUCache {
+        constructor(cap = 64) {
+          this.cap = cap; this.map = new Map();
+        }
+        get(k) {
+          if (!this.map.has(k)) return null;
+          const v = this.map.get(k); this.map.delete(k); this.map.set(k, v); return v;
+        }
+        put(k, v) {
+          if (this.map.has(k)) this.map.delete(k);
+          this.map.set(k, v);
+          if (this.map.size > this.cap) this.map.delete(this.map.keys().next().value);
+        }
+      }
+
+      // ── FUZZY SCORER (min-heap via sorted array) ───────────────
+      const KEYWORD_MAP = {
+        greeting: ['hello', 'hi', 'hey', 'morning', 'evening', 'greet', 'yo', 'sup'],
+        about: ['mohit', 'about', 'who', 'developer', 'person', 'introduce', 'profile', 'himself'],
+        skills: ['skill', 'skills', 'tech', 'stack', 'technology', 'language', 'framework', 'expertise', 'his', 'what', 'does', 'know'],
+        projects: ['project', 'projects', 'built', 'made', 'created', 'portfolio', 'work', 'show', 'app', 'website'],
+        neuralchat: ['neural', 'neuralchat', 'chat', 'conversation', 'realtime', 'websocket', 'chatapp'],
+        pixelmart: ['pixel', 'pixelmart', 'mart', 'shop', 'ecommerce', 'store', 'stripe', 'payment', 'commerce'],
+        jobai: ['jobai', 'ai', 'job', 'resume', 'recruiter', 'seeker'],
+        autoscribe: ['auto', 'autoscribe', 'scribe', 'document', 'pdf', 'summarize', 'extract', 'langchain'],
+        experience: ['experience', 'years', 'history', 'career', 'professional', 'worked', 'background'],
+        contact: ['contact', 'email', 'reach', 'message', 'linkedin', 'github', 'connect', 'find', 'him', 'touch'],
+        hire: ['hire', 'hiring', 'freelance', 'job', 'salary', 'rate', 'contract', 'employ', 'position', 'opportunity'],
+        education: ['education', 'study', 'degree', 'learn', 'university', 'college', 'self', 'taught'],
+        location: ['location', 'where', 'india', 'remote', 'timezone', 'based', 'live', 'country'],
+        ai: ['ai', 'ml', 'artificial', 'intelligence', 'machine', 'learning', 'model', 'langchain', 'openai', 'gpt', 'llm'],
+        python: ['python', 'django', 'fastapi', 'flask', 'backend', 'data', 'numpy', 'pandas'],
+        javascript: ['javascript', 'typescript', 'js', 'ts', 'node', 'express', 'frontend', 'browser', 'web'],
+        react: ['react', 'reactjs', 'next', 'nextjs', 'component', 'hook', 'jsx', 'ui'],
+        dsa: ['data', 'structure', 'algorithm', 'trie', 'heap', 'graph', 'bfs', 'cache', 'lru', 'complexity', 'built', 'chatbot', 'how'],
+        game: ['game', 'gaming', 'play', 'snake', 'hollow', 'knight', 'konami', 'arcade', 'gamer'],
+        availability: ['available', 'open', 'work', 'now', 'hire', 'status', 'currently', 'looking'],
+        help: ['help', 'guide', 'how', 'what', 'can', 'ask', 'question', 'options'],
+      };
+
+      const SPECIFICITY = {
+        neuralchat: 10, pixelmart: 10, jobai: 10, autoscribe: 10,
+        python: 8, javascript: 8, react: 8, ai: 8, dsa: 8,
+        hire: 7, availability: 7, contact: 7, location: 7, education: 7,
+        skills: 6, projects: 6, experience: 6, game: 6,
+        about: 4, help: 3, greeting: 2,
+      };
+
+      // Compute IDF weights
+      const kwFreq = {};
+      const totalIntents = Object.keys(KEYWORD_MAP).length;
+      for (const kws of Object.values(KEYWORD_MAP))
+        for (const kw of kws) kwFreq[kw] = (kwFreq[kw] || 0) + 1;
+      const IDF = {};
+      for (const [kw, f] of Object.entries(kwFreq))
+        IDF[kw] = Math.log(totalIntents / f + 1);
+
+      function fuzzyScore(text, topN = 5) {
+        const tokens = new Set(text.toLowerCase().match(/\w+/g) || []);
+        const scores = [];
+        for (const [intent, kws] of Object.entries(KEYWORD_MAP)) {
+          let s = 0;
+          for (const kw of kws) if (tokens.has(kw)) s += (IDF[kw] || 1);
+          if (s > 0) scores.push([s, intent]);
+        }
+        scores.sort((a, b) => b[0] - a[0]);
+        return scores.slice(0, topN);
+      }
+
+      function resolveIntent(text, lastIntent) {
+        const results = fuzzyScore(text, 5);
+        if (results.length > 0) {
+          // Boost by specificity to break ties
+          const boosted = results.map(([s, i]) => [s + (SPECIFICITY[i] || 0) * 0.01, s, i]);
+          boosted.sort((a, b) => b[0] - a[0]);
+          const topRaw = boosted[0][1];
+          if (topRaw >= 0.5) return boosted[0][2];
+        }
+        // Trie fallback
+        const trie_hit = window._chatTrie && window._chatTrie.containsPhrase(text);
+        if (trie_hit) return trie_hit;
+        return 'unknown';
+      }
+
+      // ── KNOWLEDGE BASE ─────────────────────────────────────────
+      const KB = {
+        greeting: { text: "Hey! 👋 I'm Mohit.exe — your interactive guide.\nAsk me about skills, projects, experience, or how to hire Mohit!", suggestions: ['skills', 'projects', 'contact'] },
+        about: { text: "Mohit is a full-stack developer with 4+ years of experience. He builds AI-powered web apps, scalable backends, and occasionally things that shouldn't exist 😄\nCurrently open to freelance and full-time roles.", suggestions: ['skills', 'projects', 'contact'] },
+        skills: { text: "🛠 Mohit's stack:\n• Frontend: React, Next.js, HTML5, CSS3, Three.js\n• Backend:  Node.js, Python, FastAPI\n• AI/ML:    LangChain, OpenAI, Pinecone, RAG\n• Database: PostgreSQL, MongoDB, Redis\n• DevOps:   Docker, AWS, CI/CD", suggestions: ['projects', 'ai', 'python'] },
+        projects: { text: "📁 Projects:\n1. NeuralChat   — AI chat (2k+ users)\n2. PixelMart    — E-commerce + AI recs\n3. JobAI        — AI hiring platform\n4. AutoScribe   — Document AI (500+ biz)\n\nAsk about any project!", suggestions: ['neuralchat', 'pixelmart', 'jobai', 'autoscribe'] },
+        neuralchat: { text: "⚡ NeuralChat\nStack: React · WebSocket · OpenAI · Redis\nFeatures: multi-model, plugin system, custom memory\nUsers: 2,000+\nDemo: neuralchat.mohit.dev", suggestions: ['pixelmart', 'contact', 'skills'] },
+        pixelmart: { text: "🛒 PixelMart\nStack: Next.js · Stripe · PostgreSQL · Vercel\nFeatures: real-time inventory, AI recommendations\nDemo: pixelmart.mohit.dev", suggestions: ['jobai', 'contact', 'skills'] },
+        jobai: { text: "🤖 JobAI\nStack: Python · Django · HTML · CSS · JS · Railway\nFeatures:\n• AI Resume Builder — generate tailored resumes\n• Resume Analyzer — ATS scoring & improvement tips\n• Smart job matching for seekers & recruiters\nDemo: jobai-sutharmohit-575.up.railway.app\nRepo: github.com/sutharmohit575/jobai", suggestions: ['autoscribe', 'contact', 'skills'] },
+        autoscribe: { text: "🤖 AutoScribe\nStack: Python · LangChain · FastAPI · Pinecone\nFeatures: extract, summarize, Q&A on any doc\nUsers: 500+ businesses\nDemo: autoscribe.mohit.dev", suggestions: ['neuralchat', 'ai', 'contact'] },
+        experience: { text: "📅 Experience:\n• 4+ years full-stack development\n• 24+ shipped production projects\n• AI tools used by 500+ companies\n• Open source contributor", suggestions: ['skills', 'projects', 'contact'] },
+        contact: { text: "📬 Reach Mohit:\n• Email:    sutharmohit575@gmail.com\n• GitHub:   github.com/sutharmohit575\n• LinkedIn: linkedin.com/in/suthar-mohit575\n• Response: < 24 hours\n\nOr fight the ⚔ CONTACT BOSS above!", suggestions: ['hire', 'projects'] },
+        hire: { text: "🚀 Mohit is open to:\n• Freelance projects (any size)\n• Full-time positions\n• Open source collabs\n• Consulting & audits\n\nRate: Let's talk — he's worth it 😄\nEmail: sutharmohit575@gmail.com", suggestions: ['skills', 'projects', 'contact'] },
+        education: { text: "🎓 Mostly self-taught — internet, open source, and an unhealthy number of side projects. He believes in learning by building.", suggestions: ['skills', 'projects'] },
+        location: { text: "📍 Based in India (IST — UTC+5:30).\nAvailable for remote work worldwide.", suggestions: ['contact', 'hire'] },
+        ai: { text: "🤖 AI/ML expertise:\n• LangChain, LlamaIndex, RAG\n• OpenAI, Gemini, Claude APIs\n• Vector DBs: Pinecone, Chroma\n• Fine-tuning, embeddings, prompt engineering", suggestions: ['autoscribe', 'skills', 'contact'] },
+        python: { text: "🐍 Python expertise:\n• FastAPI / Django for APIs\n• Data: Pandas, NumPy\n• AI: PyTorch, Transformers\n• Scripting & automation\n\nYou're talking to a Python DSA chatbot 😄", suggestions: ['skills', 'ai', 'projects'] },
+        javascript: { text: "⚡ JavaScript / TypeScript:\n• React, Next.js, Vue\n• Node.js + Express / Fastify\n• WebSockets, Web APIs\n• Full-stack TypeScript", suggestions: ['react', 'skills', 'projects'] },
+        react: { text: "⚛ React / Next.js:\n• Hooks, context, server components\n• SSR + SSG + edge functions\n• Performance (code-split, memoization)", suggestions: ['javascript', 'projects', 'skills'] },
+        dsa: { text: "📐 This chatbot IS a DSA project!\n• Trie        — O(m) intent matching\n• LRU Cache   — O(1) memoization\n• Min-Heap    — ranked fuzzy scoring\n• BFS/Graph   — conversation flow\n• Deque       — context window\n• HashMap     — O(1) lookup\n\nAll in pure Python 🐍 + JS port here!", suggestions: ['python', 'skills', 'about'] },
+        game: { text: "🎮 Mohit's a gamer! Fav: Hollow Knight (112% 🦋)\nThe portfolio is game-themed — try Snake.EXE or the Konami code: ↑↑↓↓←→←→BA!", suggestions: ['about', 'projects'] },
+        availability: { text: "✅ Currently OPEN TO WORK!\n• Full-time (remote/hybrid)\n• Freelance & contracts\n• Part-time consulting\nResponse: < 24 hours", suggestions: ['contact', 'hire', 'skills'] },
+        help: { text: "💡 Try asking:\n• 'What are his skills?'\n• 'Show me projects'\n• 'Tell me about NeuralChat'\n• 'How to contact Mohit?'\n• 'Can I hire him?'\n• 'Is he available?'\n• 'What is Python?'\n• 'How is this chatbot built?' (dsa)", suggestions: ['skills', 'projects', 'contact'] },
+        unknown: { text: "Hmm, I didn't catch that 🤔\nTry asking about:\n• skills / projects / experience\n• A project: NeuralChat, PixelMart...\n• How to contact or hire Mohit\n• Or just type 'help'!", suggestions: ['help', 'skills', 'contact'] },
+      };
+
+      // ── CONVERSATION GRAPH (BFS suggestions) ─────────────────
+      const GRAPH = {
+        greeting: ['about', 'skills', 'projects'],
+        about: ['skills', 'experience', 'contact'],
+        skills: ['projects', 'ai', 'python'],
+        projects: ['neuralchat', 'pixelmart', 'jobai', 'autoscribe'],
+        neuralchat: ['pixelmart', 'contact'],
+        pixelmart: ['jobai', 'contact'],
+        jobai: ['autoscribe', 'contact'],
+        autoscribe: ['contact', 'ai'],
+        experience: ['contact', 'hire'],
+        contact: ['hire'],
+        hire: ['contact'],
+        ai: ['autoscribe', 'skills'],
+        python: ['ai', 'skills'],
+        javascript: ['react', 'projects'],
+        react: ['projects'],
+        dsa: ['python', 'skills'],
+      };
+
+      // ── ENGINE STATE ──────────────────────────────────────────
+      const cache = new LRUCache(64);
+      const context = [];   // deque (max 8)
+      let lastIntent = 'greeting';
+      let queryCount = 0;
+      let cacheHits = 0;
+
+      // Build Trie
+      const trie = new Trie();
+      window._chatTrie = trie;
+      const PHRASES = [
+        ['hello', 'greeting'], ['hi', 'greeting'], ['hey', 'greeting'], ['good morning', 'greeting'],
+        ['about', 'about'], ['who is', 'about'], ['tell me about', 'about'], ['introduce', 'about'],
+        ['skill', 'skills'], ['tech stack', 'skills'], ['expertise', 'skills'],
+        ['project', 'projects'], ['show me', 'projects'], ['portfolio', 'projects'],
+        ['neural', 'neuralchat'], ['neuralchat', 'neuralchat'], ['neural chat', 'neuralchat'],
+        ['pixel', 'pixelmart'], ['pixelmart', 'pixelmart'], ['pixel mart', 'pixelmart'],
+        ['jobai', 'jobai'], ['job ai', 'jobai'], ['job', 'jobai'], ['resume builder', 'jobai'], ['hiring platform', 'jobai'],
+        ['autoscribe', 'autoscribe'], ['auto scribe', 'autoscribe'],
+        ['contact', 'contact'], ['email', 'contact'], ['reach', 'contact'], ['github', 'contact'], ['linkedin', 'contact'],
+        ['hire', 'hire'], ['freelance', 'hire'], ['job', 'hire'], ['salary', 'hire'],
+        ['available', 'availability'], ['open to work', 'availability'],
+        ['python', 'python'], ['javascript', 'javascript'], ['react', 'react'],
+        ['data structure', 'dsa'], ['algorithm', 'dsa'], ['dsa', 'dsa'], ['trie', 'dsa'],
+        ['how is this built', 'dsa'], ['built with', 'dsa'],
+        ['game', 'game'], ['hollow knight', 'game'], ['konami', 'game'],
+        ['help', 'help'], ['what can you', 'help'],
+        ['experience', 'experience'], ['location', 'location'], ['where', 'location'],
+        ['education', 'education'], ['ai', 'ai'], ['machine learning', 'ai'],
+        ['artificial intelligence', 'ai'],
+      ];
+      for (const [p, i] of PHRASES) trie.insert(p, i);
+
+      function respond(msg) {
+        queryCount++;
+        const norm = msg.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+
+        const cached = cache.get(norm);
+        if (cached) {
+          cacheHits++;
+          return { ...cached, fromCache: true, queryCount };
+        }
+
+        const intent = resolveIntent(norm, lastIntent);
+        const data = KB[intent] || KB.unknown;
+
+        // BFS next suggestions from graph
+        const nextTopics = GRAPH[intent] || data.suggestions || [];
+
+        const result = {
+          intent,
+          text: data.text,
+          suggestions: data.suggestions || [],
+          nextTopics: nextTopics.slice(0, 3),
+          fromCache: false,
+          queryCount,
+          dsaTrace: {
+            trieHit: trie.containsPhrase(norm) !== null,
+            cacheRatio: `${cacheHits}/${queryCount}`,
+          },
+        };
+
+        // Update context (bounded deque)
+        context.push(intent);
+        if (context.length > 8) context.shift();
+        lastIntent = intent;
+
+        cache.put(norm, { ...result });
+        return result;
+      }
+
+      // ── UI CONTROLLER ─────────────────────────────────────────
+      let chatOpen = false;
+      let hasOpened = false;
+
+      window.toggleChat = function () {
+        chatOpen = !chatOpen;
+        const win = document.getElementById('chat-window');
+        const btn = document.getElementById('chat-launcher');
+        const notif = document.getElementById('chat-notif');
+
+        if (chatOpen) {
+          win.classList.add('visible');
+          btn.classList.add('open');
+          btn.textContent = '✕';
+          notif.style.display = 'none';
+          if (!hasOpened) {
+            hasOpened = true;
+            setTimeout(() => addBotMsg(respond("hello")), 300);
+          }
+          setTimeout(() => document.getElementById('chat-input').focus(), 350);
+        } else {
+          win.classList.remove('visible');
+          btn.classList.remove('open');
+          btn.textContent = '🤖';
+        }
+        if (typeof SFX !== 'undefined') SFX.navClick();
+      };
+
+      window.sendChatMsg = function () {
+        const inp = document.getElementById('chat-input');
+        const msg = inp.value.trim();
+        if (!msg) return;
+        inp.value = '';
+        addUserMsg(msg);
+        clearSuggestions();
+        showTyping();
+        if (typeof SFX !== 'undefined') SFX.termEnter();
+        // Typing delay, then run local DSA engine (no server needed)
+        const delay = 400 + Math.min(msg.length * 12, 800);
+        setTimeout(() => {
+          hideTyping();
+          const result = respond(msg);
+          addBotMsg(result);
+          if (typeof SFX !== 'undefined') SFX.termSuccess();
+        }, delay);
+      };
+
+      window.sendSuggestion = function (text) {
+        document.getElementById('chat-input').value = text;
+        window.sendChatMsg();
+      };
+
+      function addUserMsg(text) {
+        const msgs = document.getElementById('chat-messages');
+        const wrap = document.createElement('div');
+        wrap.className = 'chat-msg user';
+        wrap.innerHTML = `
+      <div class="chat-bubble">${escHtml(text)}</div>
+      <div class="chat-meta">${now()}</div>`;
+        msgs.appendChild(wrap);
+        scrollBottom();
+      }
+
+      function addBotMsg(result) {
+        if (!result) return;
+        const msgs = document.getElementById('chat-messages');
+        const wrap = document.createElement('div');
+        wrap.className = 'chat-msg bot';
+        // Safe rendering: escHtml guards against undefined/null text
+        const safeText  = escHtml(result.text  || '');
+        const safeIntent = escHtml(result.intent || 'unknown');
+        const qNum      = result.queryCount || result.query_number || '';
+        const cached    = result.fromCache ? '✓' : '✗';
+        wrap.innerHTML =
+          `<div class="chat-bubble">${safeText.replace(/\n/g,'<br>')}</div>` +
+          `<div class="intent-badge">${safeIntent}</div>` +
+          `<div class="chat-meta">${now()} · cache:${cached}${qNum ? ' · q#'+qNum : ''}</div>`;
+        msgs.appendChild(wrap);
+        scrollBottom();
+
+        // Render suggestion chips
+        const suggs = result.suggestions || [];
+        if (suggs.length) {
+          const row = document.getElementById('chat-suggestions');
+          row.innerHTML = '';
+          suggs.forEach(s => {
+            const btn = document.createElement('button');
+            btn.className = 'chat-sugg-btn';
+            btn.textContent = s;
+            btn.onclick = () => window.sendSuggestion(s);
+            row.appendChild(btn);
+          });
+        }
+      }
+
+      function showTyping() { document.getElementById('chat-typing').classList.add('show'); scrollBottom(); }
+      function hideTyping() { document.getElementById('chat-typing').classList.remove('show'); }
+      function clearSuggestions() { document.getElementById('chat-suggestions').innerHTML = ''; }
+      function scrollBottom() {
+        const m = document.getElementById('chat-messages');
+        requestAnimationFrame(() => { m.scrollTop = m.scrollHeight; });
+      }
+      function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+      function now() {
+        return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+      }
+
+      // Show notification after 8s if chat not opened yet
+      setTimeout(() => {
+        if (!hasOpened) {
+          const notif = document.getElementById('chat-notif');
+          if (notif) notif.style.display = 'block';
+        }
+      }, 8000);
+
+    })();
+  </script>
+
+</body>
+
+</html>
