@@ -3,8 +3,11 @@ Contact / Boss Fight API router.
 POST /api/contact/submit  — processes the boss fight form
 """
 
+from contextlib import suppress
+
 from fastapi import APIRouter, HTTPException, Request
-from app.models.schemas import ContactSubmission, ContactResponse
+
+from app.models.schemas import ContactResponse, ContactSubmission
 from app.services.email_service import send_contact_email
 from app.services.rate_limiter import RateLimiter
 
@@ -26,11 +29,8 @@ async def submit_contact(payload: ContactSubmission, request: Request):
             detail="Too many contact attempts. Try again later."
         )
 
-    try:
+    with suppress(Exception):
         await send_contact_email(payload)
-    except Exception:
-        # Don't expose mail errors to the client — logged server-side
-        pass
 
     return ContactResponse(
         success=True,
