@@ -5,8 +5,9 @@ GET /api/projects/{slug}   — single project detail
 """
 
 from fastapi import APIRouter, HTTPException
-from app.models.schemas import Project, ProjectList
+
 from app.data.portfolio_data import PROJECTS
+from app.models.schemas import Project, ProjectList
 
 router = APIRouter()
 
