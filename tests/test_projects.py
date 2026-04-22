@@ -39,7 +39,7 @@ def test_get_project_not_found():
 
 
 def test_project_has_required_fields():
-    resp = client.get("/api/projects/cryptovault")
+    resp = client.get("/api/projects/jobai")
     assert resp.status_code == 200
     data = resp.json()
     for field in ("slug", "name", "description", "tags", "biome", "status"):
@@ -49,4 +49,4 @@ def test_project_has_required_fields():
 def test_all_project_slugs_present():
     resp = client.get("/api/projects/")
     slugs = {p["slug"] for p in resp.json()["projects"]}
-    assert slugs == {"neuralchat", "pixelmart", "cryptovault", "autoscribe"}
+    assert slugs == {"neuralchat", "pixelmart", "jobai", "autoscribe"}
